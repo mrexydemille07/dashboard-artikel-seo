@@ -1,0 +1,14 @@
+# artefak lokal / bisa di-regenerate
+sheet*.csv
+gh_token.json
+audit2.log
+shot-*.png
+v-*.png
+full-*.png
+crop-*.png
+__pycache__/
+*.pyc
+
+# ekspor GSC mentah (33rb URL, 11 MB) — tidak dipakai dashboard,
+# build.py memangkasnya ke data/gsc.json. Simpan lokal saja.
+data/gsc_raw.json

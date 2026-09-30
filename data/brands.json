@@ -1,0 +1,97 @@
+[
+ {
+  "domain": "synergysolusi.com",
+  "client": "SSI",
+  "articles": 80
+ },
+ {
+  "domain": "it.proxsisgroup.com",
+  "client": "Proxsis IT",
+  "articles": 80
+ },
+ {
+  "domain": "itgid.org",
+  "client": "ITGID",
+  "articles": 80
+ },
+ {
+  "domain": "biztechacademy.id",
+  "client": "Biztech Academy",
+  "articles": 80
+ },
+ {
+  "domain": "hr.proxsisgroup.com",
+  "client": "Proxsis HR",
+  "articles": 70
+ },
+ {
+  "domain": "strategy.proxsisgroup.com",
+  "client": "Strategy.Proxsis",
+  "articles": 60
+ },
+ {
+  "domain": "environment-indonesia.com",
+  "client": "IEC Non-BNSP",
+  "articles": 60
+ },
+ {
+  "domain": "indonesiasafetycenter.org",
+  "client": "ISC",
+  "articles": 52
+ },
+ {
+  "domain": "petrotrainingasia.com",
+  "client": "Petrotraining",
+  "articles": 50
+ },
+ {
+  "domain": "talkactive.co.id",
+  "client": "Talkactive",
+  "articles": 49
+ },
+ {
+  "domain": "fs-institute.org",
+  "client": "FSI",
+  "articles": 40
+ },
+ {
+  "domain": "isoindonesiacenter.com",
+  "client": "Isocenter",
+  "articles": 40
+ },
+ {
+  "domain": "icicert.com",
+  "client": "Icicert",
+  "articles": 40
+ },
+ {
+  "domain": "grc-indonesia.com",
+  "client": "GRC",
+  "articles": 34
+ },
+ {
+  "domain": "ipqi.org",
+  "client": "IPQI",
+  "articles": 34
+ },
+ {
+  "domain": "digital.proxsisgroup.com",
+  "client": "Proxsis Digital",
+  "articles": 28
+ },
+ {
+  "domain": "infrasec.proxsisgroup.com",
+  "client": "Infra Sec",
+  "articles": 5
+ },
+ {
+  "domain": "infra.proxsisgroup.com",
+  "client": "Proxsis Infra",
+  "articles": 5
+ },
+ {
+  "domain": "academy.proxsisgroup.com",
+  "client": "Proxsis Academy",
+  "articles": 5
+ }
+]
