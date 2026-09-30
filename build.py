@@ -26,6 +26,7 @@ def main():
     brands = load("brands.json", [])
     gsc = load("gsc.json", {})
     audit = load("unindexed_audit.json", [])
+    meta_audit = load("meta_audit.json", {})
     # Pangkas ke URL artikel saja: gsc.json mentah ~33rb URL (10 MB), yang dipakai
     # dashboard cuma yang ada di kertas kerja. Mentah tetap disimpan sbg gsc_raw.json.
     if gsc:
@@ -56,6 +57,7 @@ def main():
                        ("/*__BRANDS__*/[]", js(brands)),
                        ("/*__GSC__*/{}", js(gsc)),
                        ("/*__AUDIT__*/[]", js(audit)),
+                      ("/*__META_AUDIT__*/{}", js(meta_audit)),
                        ("/*__META__*/{}", js(meta))):
         assert token in tpl, "token hilang dari template: " + token
         tpl = tpl.replace(token, val)

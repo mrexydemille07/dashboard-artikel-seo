@@ -36,7 +36,7 @@ th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);verti
 th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;
   cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0;background:var(--panel)}
 tbody tr:hover{background:var(--panel2)}
-.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;white-space:nowrap}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;white-space:nowrap}
 .p-ok{background:rgba(52,211,153,.15);color:var(--ok)}
 .p-warn{background:rgba(251,191,36,.15);color:var(--warn)}
 .p-bad{background:rgba(248,113,113,.15);color:var(--bad)}
@@ -64,6 +64,12 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:820px){.two{grid-template-columns:1fr}}
 .spark{display:block}
+.btn-copy{font-size:11px;padding:4px 9px}
+.ok{color:var(--ok)}
+tr.meta-saran td{background:var(--panel2);border-bottom:1px solid var(--line);padding-top:4px;padding-bottom:8px}
+tr.meta-saran div{margin:2px 0}
+tr.meta-saran td{white-space:normal}
+.pill{white-space:normal}
 </style>
 </head>
 <body>
@@ -80,7 +86,8 @@ const ARTICLES = /*__ARTICLES__*/[];
 const BRANDS   = /*__BRANDS__*/[];
 const GSC      = /*__GSC__*/{};
 const AUDIT    = /*__AUDIT__*/[];   // hasil audit_unindexed.py (status HTTP/noindex/sitemap)
-const META     = /*__META__*/{};
+const META = /*__META__*/{};
+const META_AUDIT = /*__META_AUDIT__*/{};
 
 const TODAY = new Date().toISOString().slice(0,10);
 const CUR_KEY = TODAY.slice(0,7);            // "2026-09"
@@ -194,6 +201,7 @@ const TABS = [
   ['performa','📈 Performa Artikel'],
   ['keyword','🔑 Keyword & Kanibalisasi'],
   ['banding','🔁 Banding Periode'],
+  ['meta','✍️ Perbaikan Meta'],
   ['strategi','🎯 Strategi Konten'],
   ['aksi','🛠️ Aksi & Perbaikan'],
 ];
@@ -207,7 +215,7 @@ function render(){
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
     overview:viewOverview, pipeline:viewPipeline, performa:viewPerforma,
-    keyword:viewKeyword, banding:viewBanding, strategi:viewStrategi, aksi:viewAksi}[cur])();
+    keyword:viewKeyword, banding:viewBanding, meta:viewMeta, strategi:viewStrategi, aksi:viewAksi}[cur])();
   bind();
 }
 
@@ -564,6 +572,52 @@ function viewBanding(){
       <td>${dec(o.A.pos,1)}</td><td>${dec(o.B.pos,1)}</td><td>${delta(o.B.pos,o.A.pos,true)}</td></tr>`).join(''))}`;
 }
 
+/* ---------- 3c. Perbaikan Meta ---------- */
+function metaRows(){
+  const out = [];
+  for (const [url,v] of Object.entries(META_AUDIT)){
+    if (v.error) continue;
+    out.push(Object.assign({url}, v));
+  }
+  out.sort((a,b)=>b.impr-a.impr);
+  return out;
+}
+function viewMeta(){
+  const all = metaRows();
+  if (!all.length) return `<div class="card"><h3 style="margin-top:0">Belum ada audit meta</h3>
+    <p class="muted">Jalankan <code>python meta_audit.py</code> lalu <code>python meta_fix.py</code> dan <code>python build.py</code>.</p></div>`;
+  const f = all.filter(a=>
+    (!F.client || a.client===F.client) &&
+    (!F.q || ((a.judul||'')+' '+(a.keyword||'')+' '+(a.client||'')).toLowerCase().includes(F.q.toLowerCase())));
+  const longT = all.filter(a=>a.len_title>60).length;
+  const longD = all.filter(a=>a.len_desc>155).length;
+  const emptyD = all.filter(a=>!a.desc).length;
+  const noKw = all.filter(a=>!a.keyword).length;
+  const rows = f.slice(0,300).map(a=>`<tr>
+    <td><b>${esc(a.client)}</b><div class="muted small">${esc((a.judul||'').slice(0,70))}</div></td>
+    <td>${fmt(a.impr)}</td><td>${dec(a.ctr,2)}%</td><td>${dec(a.pos,1)}</td>
+    <td>${a.keyword?`<code>${esc(a.keyword)}</code>`:'<span class="muted">—</span>'}</td>
+    <td class="small">${a.issues.map(i=>`<span class="pill p-warn">${esc(i)}</span>`).join(' ')||'<span class="pill p-ok">ok</span>'}</td>
+  </tr>
+  <tr class="meta-saran"><td colspan="6">
+    <div class="muted small">lama (${a.len_title}c): ${esc(a.title||'—')}</div>
+    <div class="ok small">saran (${a.saran_title.length}c): ${esc(a.saran_title)}</div>
+    <div class="muted small">desc saran (${a.saran_desc.length}c): ${esc(a.saran_desc)}</div>
+    <button class="btn-copy" data-t="${esc(a.saran_title)}" data-d="${esc(a.saran_desc)}">Salin title + description</button>
+  </td></tr>`).join('');
+  return `<div class="grid kpi">
+    ${kpi('URL diaudit', fmt(all.length), 'impresi ≥100 & CTR <1,5%')}
+    ${kpi('Title kepanjangan', fmt(longT), '>60 karakter, terpotong di SERP')}
+    ${kpi('Description kepanjangan', fmt(longD), '>155 karakter')}
+    ${kpi('Description kosong', fmt(emptyD), 'belum ada meta description')}
+    ${kpi('Tanpa keyword GSC', fmt(noKw), 'belum ada query tercatat')}
+  </div>
+  <h2>✍️ Perbaikan Meta Title &amp; Description <span class="muted small">(${fmt(f.length)} URL, urut impresi)</span></h2>
+  <div class="card"><p class="muted small">Saran dibuat dari aturan panjang + keyword GSC yang sudah terbukti mendatangkan impresi. Klik <b>Salin</b> lalu tempel ke Yoast/RankMath.</p>
+  ${table([{k:'client',t:'Artikel'},{k:'impr',t:'Impr'},{k:'ctr',t:'CTR'},{k:'pos',t:'Rank'},
+           {k:'keyword',t:'Keyword'},{k:'issues',t:'Masalah'}], rows)}</div>`;
+}
+
 /* ---------- 4. Strategi ---------- */
 function viewStrategi(){
   const noKw   = ARTICLES.filter(a=>a.live_url && !a.keyword);
@@ -700,6 +754,13 @@ function bind(){
         window._qt=setTimeout(()=>{const p=q.selectionStart;render();
           const n=document.getElementById('f-q'); if(n){n.focus();n.setSelectionRange(p,p);}},250);};
   document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>sortBy(th.dataset.k));
+  document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=()=>{
+    const txt='Title: '+b.dataset.t+'\nDescription: '+b.dataset.d;
+    const done=()=>{b.textContent='Tersalin';setTimeout(()=>b.textContent='Salin',1400);};
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done,done);
+    else {const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);
+          ta.select();try{document.execCommand('copy')}catch(e){}ta.remove();done();}
+  });
   const dl = document.getElementById('dl-pipeline');
   if (dl) dl.onclick = () => downloadCsv('pipeline-artikel.csv',
     ['Kategori','Klien','Bulan','Judul','Deadline','Status','Keyword','Draft','Live'],
