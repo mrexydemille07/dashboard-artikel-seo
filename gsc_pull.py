@@ -96,6 +96,25 @@ def pull_site(token, site, days):
                                       "ctr": ctr, "pos": pos})
         for m in out.values():
             m["weeks"].sort(key=lambda x: x["w"])
+
+    # 3) query per halaman -> keyword apa yang mendatangkan impresi.
+    #    Dimensi page+query: satu request, tapi baris bisa banyak -> rowLimit tinggi.
+    r3 = query(token, site, {"startDate": iso(start), "endDate": iso(end),
+                             "dimensions": ["page", "query"], "rowLimit": 25000})
+    if r3:
+        for row in r3.get("rows", []):
+            url, q = row["keys"][0], row["keys"][1]
+            m = out.get(url)
+            if m is None:
+                continue
+            m.setdefault("queries", []).append({
+                "q": q, "impr": row.get("impressions", 0), "clicks": row.get("clicks", 0),
+                "ctr": round(row.get("ctr", 0) * 100, 2),
+                "pos": round(row.get("position", 0), 1)})
+        for m in out.values():
+            if m.get("queries"):
+                m["queries"].sort(key=lambda x: -x["impr"])
+                m["queries"] = m["queries"][:25]      # 25 keyword teratas per URL
     return out
 
 

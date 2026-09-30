@@ -192,6 +192,7 @@ const TABS = [
   ['overview','📊 Ringkasan'],
   ['pipeline','🏭 Pipeline Produksi'],
   ['performa','📈 Performa Artikel'],
+  ['keyword','🔑 Keyword & Kanibalisasi'],
   ['strategi','🎯 Strategi Konten'],
   ['aksi','🛠️ Aksi & Perbaikan'],
 ];
@@ -205,7 +206,7 @@ function render(){
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
     overview:viewOverview, pipeline:viewPipeline, performa:viewPerforma,
-    strategi:viewStrategi, aksi:viewAksi}[cur])();
+    keyword:viewKeyword, strategi:viewStrategi, aksi:viewAksi}[cur])();
   bind();
 }
 
@@ -401,6 +402,96 @@ python build.py</pre>
         <td>${dec(m.ctr)}</td><td>${m.pos?dec(m.pos,1):'—'}</td>
         <td>${m.weeks?spark(m.weeks,'impr','#38bdf8'):''}</td></tr>`;
     }).join(''))}`;
+}
+
+/* ---------- 3b. Keyword & Kanibalisasi ---------- */
+// query sampah: operator pencarian, kata tunggal generik, brand sendiri
+const NOISE = /^(ya|iya|ok|oke|hai|hi|halo|test|tes|apa|itu|ini|dan|atau|the|a|an)$/i;
+function isNoise(q){
+  const s = q.trim();
+  if (s.length < 4) return true;
+  if (/^(site|inurl|intitle|filetype|related):/i.test(s)) return true;
+  if (NOISE.test(s)) return true;
+  if (/^(https?:|www\.)/i.test(s)) return true;
+  return false;
+}
+function allQueries(){
+  // gabung query dari semua URL artikel -> keyword apa yang kita punya posisi
+  const map = {};
+  for (const a of ARTICLES){
+    const m = metrics(a); if (!m || !m.queries) continue;
+    for (const q of m.queries){
+      if (isNoise(q.q)) continue;
+      const k = q.q.toLowerCase();
+      const o = map[k] = map[k] || {q:q.q, impr:0, clicks:0, posW:0, urls:[]};
+      o.impr += q.impr; o.clicks += q.clicks; o.posW += q.pos * q.impr;
+      o.urls.push({url:a.live_url, judul:a.judul, client:a.client, pos:q.pos, impr:q.impr});
+    }
+  }
+  for (const o of Object.values(map)){
+    o.pos = o.impr ? +(o.posW/o.impr).toFixed(1) : 0;
+    o.ctr = o.impr ? +(100*o.clicks/o.impr).toFixed(2) : 0;
+    o.urls.sort((a,b)=>a.pos-b.pos);
+  }
+  return map;
+}
+
+function viewKeyword(){
+  if (!Object.keys(GSC).length) return `<div class="card"><h3 style="margin-top:0">Belum ada data keyword</h3>
+    <p class="muted">Jalankan <code>python gsc_pull.py --all --days 90</code> lalu <code>python build.py</code>.</p></div>`;
+  const Q = allQueries();
+  const list = Object.values(Q);
+  if (!list.length) return `<div class="card"><p class="muted">Data GSC belum memuat dimensi query. Jalankan ulang <code>gsc_pull.py</code>.</p></div>`;
+
+  // kanibalisasi hanya bermakna dalam satu domain: beda klien = beda SERP
+  const kanib = list.map(o=>{
+    const byDom = {};
+    for (const u of o.urls) (byDom[u.client] = byDom[u.client]||[]).push(u);
+    const clash = Object.entries(byDom).filter(([c,us])=>us.length>1)
+                     .sort((a,b)=>b[1].length-a[1].length);
+    return clash.length ? {...o, clash} : null;
+  }).filter(Boolean).sort((a,b)=>b.clash[0][1].length-a.clash[0][1].length);
+  const peluang = list.filter(o=>o.pos>3 && o.pos<=10 && o.impr>=50).sort((a,b)=>b.impr-a.impr);
+  const nolKlik = list.filter(o=>o.impr>=100 && o.clicks===0).sort((a,b)=>b.impr-a.impr);
+  const top = list.filter(o=>o.pos<=3).sort((a,b)=>b.impr-a.impr);
+
+  return `
+  <div class="grid kpi">
+    ${kpi('Total Keyword', fmt(list.length), 'yang mendatangkan impresi')}
+    ${kpi('Kanibalisasi', fmt(kanib.length), 'keyword direbut >1 artikel')}
+    ${kpi('Peluang Top 3', fmt(peluang.length), 'rank 4-10, impresi ≥50')}
+    ${kpi('Impresi Nol Klik', fmt(nolKlik.length), '≥100 impresi, 0 klik')}
+    ${kpi('Sudah Top 3', fmt(top.length), 'keyword yang sudah menang')}
+  </div>
+
+  <h2>⚠️ Kanibalisasi Keyword — satu keyword, banyak artikel</h2>
+  <div class="card"><p class="muted small">Google bingung memilih halaman mana yang ditampilkan. Gabungkan artikel atau bedakan sudut keyword-nya.</p>
+  ${table([{k:'q',t:'Keyword'},{k:'n',t:'Jml Artikel'},{k:'impr',t:'Impresi'},{k:'pos',t:'Rank Terbaik'},{k:'urls',t:'Artikel yang Berebut'}],
+    kanib.slice(0,60).map(o=>{
+      const [cli, us] = o.clash[0];
+      return `<tr><td><b>${esc(o.q)}</b></td>
+      <td><span class="pill p-bad">${us.length}</span></td><td>${fmt(o.impr)}</td>
+      <td>${dec(us[0].pos,1)}</td>
+      <td class="small"><span class="muted">${esc(cli)}</span><br>${us.slice(0,3).map(u=>`<a href="${esc(u.url)}" target="_blank">${esc((u.judul||u.url).slice(0,60))}</a> <span class="muted">(#${dec(u.pos,1)})</span>`).join('<br>')}
+      ${us.length>3?`<br><span class="muted">+${us.length-3} lagi</span>`:''}</td></tr>`;
+    }).join('')||'<tr><td colspan="5" class="muted">Tidak ada kanibalisasi. 👍</td></tr>')}</div>
+
+  <h2>🎯 Peluang Top 3 — keyword rank 4-10 dengan impresi tinggi</h2>
+  <div class="card">${table([{k:'q',t:'Keyword'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR %'},{k:'pos',t:'Rank'},{k:'url',t:'Artikel'}],
+    peluang.slice(0,80).map(o=>`<tr><td><b>${esc(o.q)}</b></td><td>${fmt(o.impr)}</td><td>${fmt(o.clicks)}</td>
+      <td>${dec(o.ctr)}</td><td>${dec(o.pos,1)}</td>
+      <td class="small"><a href="${esc(o.urls[0].url)}" target="_blank">${esc((o.urls[0].judul||'').slice(0,70))}</a></td></tr>`).join('')||'<tr><td colspan="6" class="muted">Tidak ada.</td></tr>')}</div>
+
+  <h2>📉 Impresi ≥100 tapi Nol Klik — judul/meta tidak menarik</h2>
+  <div class="card">${table([{k:'q',t:'Keyword'},{k:'impr',t:'Impresi'},{k:'pos',t:'Rank'},{k:'url',t:'Artikel'}],
+    nolKlik.slice(0,60).map(o=>`<tr><td><b>${esc(o.q)}</b></td><td>${fmt(o.impr)}</td><td>${dec(o.pos,1)}</td>
+      <td class="small"><a href="${esc(o.urls[0].url)}" target="_blank">${esc((o.urls[0].judul||'').slice(0,70))}</a></td></tr>`).join('')||'<tr><td colspan="4" class="muted">Tidak ada.</td></tr>')}</div>
+
+  <h2>✅ Sudah Top 3 — pertahankan</h2>
+  <div class="card">${table([{k:'q',t:'Keyword'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR %'},{k:'pos',t:'Rank'},{k:'url',t:'Artikel'}],
+    top.slice(0,60).map(o=>`<tr><td><b>${esc(o.q)}</b></td><td>${fmt(o.impr)}</td><td>${fmt(o.clicks)}</td>
+      <td>${dec(o.ctr)}</td><td><span class="pill p-ok">${dec(o.pos,1)}</span></td>
+      <td class="small"><a href="${esc(o.urls[0].url)}" target="_blank">${esc((o.urls[0].judul||'').slice(0,70))}</a></td></tr>`).join('')||'<tr><td colspan="6" class="muted">Tidak ada.</td></tr>')}</div>`;
 }
 
 /* ---------- 4. Strategi ---------- */
