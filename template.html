@@ -193,6 +193,7 @@ const TABS = [
   ['pipeline','🏭 Pipeline Produksi'],
   ['performa','📈 Performa Artikel'],
   ['keyword','🔑 Keyword & Kanibalisasi'],
+  ['banding','🔁 Banding Periode'],
   ['strategi','🎯 Strategi Konten'],
   ['aksi','🛠️ Aksi & Perbaikan'],
 ];
@@ -206,7 +207,7 @@ function render(){
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
     overview:viewOverview, pipeline:viewPipeline, performa:viewPerforma,
-    keyword:viewKeyword, strategi:viewStrategi, aksi:viewAksi}[cur])();
+    keyword:viewKeyword, banding:viewBanding, strategi:viewStrategi, aksi:viewAksi}[cur])();
   bind();
 }
 
@@ -492,6 +493,75 @@ function viewKeyword(){
     top.slice(0,60).map(o=>`<tr><td><b>${esc(o.q)}</b></td><td>${fmt(o.impr)}</td><td>${fmt(o.clicks)}</td>
       <td>${dec(o.ctr)}</td><td><span class="pill p-ok">${dec(o.pos,1)}</span></td>
       <td class="small"><a href="${esc(o.urls[0].url)}" target="_blank">${esc((o.urls[0].judul||'').slice(0,70))}</a></td></tr>`).join('')||'<tr><td colspan="6" class="muted">Tidak ada.</td></tr>')}</div>`;
+}
+
+/* ---------- 3c. Banding Periode ---------- */
+function periodSplit(){
+  // kumpulkan semua label minggu yang ada
+  const wks = new Set();
+  for (const m of Object.values(GSC)) for (const w of (m.weeks||[])) wks.add(w.w);
+  const all = [...wks].sort();
+  if (all.length < 2) return null;
+  const n = Math.min(4, Math.floor(all.length/2));
+  return {A: all.slice(-2*n, -n), B: all.slice(-n), all};
+}
+function periodAgg(list, weeks){
+  const set = new Set(weeks);
+  const o = {impr:0, clicks:0, posW:0, n:0};
+  for (const a of list){
+    const m = metrics(a); if (!m || !m.weeks) continue;
+    let hit = false;
+    for (const w of m.weeks){
+      if (!set.has(w.w)) continue;
+      hit = true;
+      o.impr += w.impr||0; o.clicks += w.clicks||0;
+      o.posW += (w.pos||0)*(w.impr||0);
+    }
+    if (hit) o.n++;
+  }
+  o.pos = o.impr ? +(o.posW/o.impr).toFixed(1) : 0;
+  o.ctr = o.impr ? +(100*o.clicks/o.impr).toFixed(2) : 0;
+  return o;
+}
+function delta(b, a, lowerBetter){
+  if (!a) return b ? '<span class="pill p-ok">baru</span>' : '—';
+  const d = b - a;
+  const pctv = a ? Math.round(100*d/a) : 0;
+  const good = lowerBetter ? d < 0 : d > 0;
+  const cls = d === 0 ? 'p-dim' : (good ? 'p-ok' : 'p-bad');
+  const sign = d > 0 ? '+' : '';
+  const val = lowerBetter ? sign+dec(Math.abs(d)<0.05?0:d,1) : sign+fmt(d);
+  return `<span class="pill ${cls}">${val}${lowerBetter?'':' ('+sign+pctv+'%)'}</span>`;
+}
+function viewBanding(){
+  const sp = periodSplit();
+  if (!sp) return `<div class="card"><p class="muted">Butuh minimal 2 minggu data GSC untuk membandingkan periode.</p></div>`;
+  const rows = CLIENTS.map(c=>{
+    const l = ARTICLES.filter(a=>a.client===c);
+    const A = periodAgg(l, sp.A), B = periodAgg(l, sp.B);
+    return {c, A, B};
+  }).filter(o=>o.A.n || o.B.n).sort((a,b)=>(b.B.impr-b.A.impr)-(a.B.impr-a.A.impr));
+
+  const totA = periodAgg(ARTICLES, sp.A), totB = periodAgg(ARTICLES, sp.B);
+  const fmtW = w => w.length ? w[0]+'…'+w[w.length-1] : '—';
+
+  return `
+  <div class="grid kpi">
+    ${kpi('Impresi Periode B', fmt(totB.impr), 'vs '+fmt(totA.impr)+' di periode A')}
+    ${kpi('Klik Periode B', fmt(totB.clicks), 'vs '+fmt(totA.clicks))}
+    ${kpi('CTR Periode B', dec(totB.ctr)+'%', 'vs '+dec(totA.ctr)+'%')}
+    ${kpi('Rank Periode B', dec(totB.pos,1), 'vs '+dec(totA.pos,1)+' (kecil = baik)')}
+  </div>
+  <p class="muted small">Periode A = ${fmtW(sp.A)} • Periode B = ${fmtW(sp.B)} (masing-masing ${sp.A.length} minggu)</p>
+
+  <h2>Per Klien — Periode B vs A</h2>
+  ${table([{k:'c',t:'Klien'},{k:'ia',t:'Impresi A'},{k:'ib',t:'Impresi B'},{k:'di',t:'Δ Impresi'},
+           {k:'ca',t:'Klik A'},{k:'cb',t:'Klik B'},{k:'dc',t:'Δ Klik'},
+           {k:'pa',t:'Rank A'},{k:'pb',t:'Rank B'},{k:'dp',t:'Δ Rank'}],
+    rows.map(o=>`<tr><td><b>${esc(o.c)}</b></td>
+      <td>${fmt(o.A.impr)}</td><td>${fmt(o.B.impr)}</td><td>${delta(o.B.impr,o.A.impr,false)}</td>
+      <td>${fmt(o.A.clicks)}</td><td>${fmt(o.B.clicks)}</td><td>${delta(o.B.clicks,o.A.clicks,false)}</td>
+      <td>${dec(o.A.pos,1)}</td><td>${dec(o.B.pos,1)}</td><td>${delta(o.B.pos,o.A.pos,true)}</td></tr>`).join(''))}`;
 }
 
 /* ---------- 4. Strategi ---------- */
