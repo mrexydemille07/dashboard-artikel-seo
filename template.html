@@ -121,7 +121,7 @@ const MONTHS  = [...new Set(ARTICLES.map(a=>a.month).filter(Boolean))]
 
 function agg(list){
   const o = {n:list.length, posted:0, overdue:0, draft:0, kw:0, cta:0, outline:0,
-             impr:0, clicks:0, rankSum:0, rankN:0, withGsc:0};
+             impr:0, clicks:0, rankSum:0, rankN:0, withGsc:0, top3:0, page1:0, page2:0, page3:0};
   for (const a of list){
     const s = status(a);
     if (s==='Posted') o.posted++; else if (s==='Overdue') o.overdue++; else if (s==='Draft') o.draft++;
@@ -130,7 +130,9 @@ function agg(list){
     if ((a.outline||'').length>40) o.outline++;
     const m = metrics(a);
     if (m){ o.withGsc++; o.impr+=m.impr||0; o.clicks+=m.clicks||0;
-            if (m.pos){ o.rankSum+=m.pos; o.rankN++; } }
+            if (m.pos){ o.rankSum+=m.pos; o.rankN++;
+              if (m.pos<=3) o.top3++; else if (m.pos<=10) o.page1++;
+              else if (m.pos<=20) o.page2++; else o.page3++; } }
   }
   o.ctr = o.impr ? +(100*o.clicks/o.impr).toFixed(2) : 0;
   o.rank = o.rankN ? +(o.rankSum/o.rankN).toFixed(1) : 0;
@@ -160,6 +162,24 @@ function spark(weeks,key,color){
   const pts = v.map((x,i)=>`${i*(100/(v.length-1||1))},${28-26*x/max}`).join(' ');
   return `<svg class="spark" viewBox="0 0 100 30" width="90" height="26" preserveAspectRatio="none">
     <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`;
+}
+function posBuckets(list){
+  const b = {'Top 3':0, 'Halaman 1 (4-10)':0, 'Halaman 2 (11-20)':0, 'Halaman 3+ (>20)':0};
+  for (const a of (list||ARTICLES)){
+    const m = metrics(a); if (!m) continue;
+    const p = m.pos||0; if (!p) continue;
+    if (p<=3) b['Top 3']++; else if (p<=10) b['Halaman 1 (4-10)']++;
+    else if (p<=20) b['Halaman 2 (11-20)']++; else b['Halaman 3+ (>20)']++;
+  }
+  return b;
+}
+function downloadCsv(name, cols, rows){
+  const q = v => '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const csv = '\ufeff' + [cols.map(q).join(',')].concat(
+    rows.map(r=>cols.map(c=>q(r[c])).join(','))).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
 }
 function table(cols,rows,sortKey){
   return `<div class="scroll"><table><thead><tr>${
@@ -220,10 +240,23 @@ function viewOverview(){
     ${gscReady?kpi('Impresi GSC', fmt(all.impr), all.withGsc+' artikel terhubung'):''}
     ${gscReady?kpi('Klik GSC', fmt(all.clicks), 'CTR '+all.ctr+'%'):''}
     ${gscReady?kpi('Rank rata-rata', all.rank||'—', 'semakin kecil semakin baik'):''}
+    ${gscReady?kpi('Top 3 Google', fmt(all.top3), pct(all.top3,all.withGsc)+'% dari '+all.withGsc+' artikel berdata'):''}
+    ${gscReady?kpi('Halaman 1 (4-10)', fmt(all.page1), 'target naik ke Top 3'):''}
+    ${gscReady?kpi('Halaman 2+', fmt(all.page2+all.page3), 'perlu dorongan konten'):''}
   </div>
+
+  ${gscReady?`<h2>Distribusi Posisi Google</h2>
+  <div class="card">${bars(Object.entries(posBuckets()).map(([l,v])=>({l, v})), {color:'#34d399'})}
+    <p class="muted small">Dari ${all.withGsc} artikel yang punya data GSC. Semakin banyak di Top 3, semakin besar trafik organik.</p></div>`:''}
 
   <h2>Produksi per Bulan</h2>
   <div class="card">${bars(byMonth.map(o=>({l:o.m.split(' ')[0].slice(0,3)+' '+o.m.split(' ')[1].slice(2), v:o.n})))}</div>
+
+  <h2>Kuota vs Realisasi — Bulan Berjalan</h2>
+  ${viewKuota()}
+
+  <h2>Produksi per Penulis</h2>
+  ${viewPenulis()}
 
   <h2>Kinerja per Klien</h2>
   ${table(
@@ -239,6 +272,47 @@ function viewOverview(){
   ${gscReady?'':'<p class="muted small">Kolom Impresi/Klik/CTR/Rank kosong — jalankan <code>gsc_pull.py</code> untuk menarik data Search Console.</p>'}`;
 }
 
+function viewKuota(){
+  // hanya bulan berjalan (CUR_KEY), bukan bulan depan
+  const show = MONTHS.filter(m=>monthKey(m)===CUR_KEY);
+  if (!show.length) return '<p class="muted small">Tidak ada data untuk bulan berjalan ('+CUR_KEY+').</p>';
+  const rows = [];
+  for (const c of CLIENTS){
+    for (const m of show){
+      const l = ARTICLES.filter(a=>a.client===c && a.month===m);
+      if (!l.length) continue;
+      const q = l[0].kuota || l.length;   // kuota = angka blok, fallback jumlah baris
+      const done = l.filter(a=>a.live_url).length;
+      rows.push({c, m, q, n:l.length, done, gap:q-done});
+    }
+  }
+  if (!rows.length) return '<p class="muted small">Tidak ada kuota tercatat untuk bulan berjalan.</p>';
+  rows.sort((a,b)=>b.gap-a.gap);
+  return table([{k:'c',t:'Klien'},{k:'m',t:'Bulan'},{k:'q',t:'Kuota'},{k:'done',t:'Posted'},
+                {k:'gap',t:'Kurang'},{k:'st',t:'Status'}],
+    rows.map(o=>`<tr><td><b>${esc(o.c)}</b></td><td class="small">${esc(o.m)}</td><td>${o.q}</td>
+      <td>${o.done}</td><td>${o.gap>0?`<span class="pill p-bad">${o.gap}</span>`:'<span class="pill p-ok">0</span>'}</td>
+      <td>${o.gap<=0?'<span class="pill p-ok">Terpenuhi</span>':
+        o.done?`<span class="pill p-warn">Kurang ${o.gap}</span>`:'<span class="pill p-bad">Belum mulai</span>'}</td></tr>`).join(''));
+}
+
+function viewPenulis(){
+  const names = {};
+  for (const a of ARTICLES){
+    const key = (a.penulis||'').trim().toUpperCase() || '—';
+    const o = names[key] = names[key] || {n:0, posted:0, overdue:0, draft:0};
+    o.n++; const s = status(a);
+    if (s==='Posted') o.posted++; else if (s==='Overdue') o.overdue++; else if (s==='Draft') o.draft++;
+  }
+  const rows = Object.entries(names).filter(([k])=>k!=='—').sort((a,b)=>b[1].n-a[1].n);
+  if (!rows.length) return '<p class="muted small">Kertas kerja tidak mencantumkan penulis.</p>';
+  return table([{k:'c',t:'Penulis'},{k:'n',t:'Artikel'},{k:'posted',t:'Posted'},
+                {k:'draft',t:'Draft'},{k:'overdue',t:'Overdue'}],
+    rows.map(([k,o])=>`<tr><td><b>${esc(k)}</b></td><td>${o.n}</td>
+      <td><span class="pill p-ok">${o.posted}</span></td><td>${o.draft}</td>
+      <td>${o.overdue?`<span class="pill p-bad">${o.overdue}</span>`:'0'}</td></tr>`).join(''));
+}
+
 /* ---------- 2. Pipeline ---------- */
 function viewPipeline(){
   const rows = filtered();
@@ -252,6 +326,7 @@ function viewPipeline(){
     <select id="f-status"><option value="">Semua status</option>${
       ['Posted','Overdue','Draft','Belum mulai'].map(s=>`<option${F.status===s?' selected':''}>${s}</option>`).join('')}</select>
     <input id="f-q" placeholder="cari judul / keyword…" value="${esc(F.q)}" style="min-width:220px">
+    <button id="dl-pipeline">⬇ Unduh CSV (${rows.length})</button>
     <span class="muted small">${rows.length} artikel • ${o.posted} posted • ${o.overdue} overdue</span>
   </div>
   ${table(
@@ -303,6 +378,19 @@ python build.py</pre>
            {k:'ctr',t:'CTR %'},{k:'rank',t:'Rank'}],
     byClient.map(o=>`<tr><td><b>${esc(o.c)}</b></td><td>${o.n}</td><td>${fmt(o.impr)}</td>
       <td>${fmt(o.clicks)}</td><td>${dec(o.ctr)}</td><td>${o.rank?dec(o.rank,1):'—'}</td></tr>`).join(''))}
+  <h2>Peluang Terdekat — Rank 4-10 (dorong ke Top 3)</h2>
+  <div class="card"><p class="muted small">Artikel halaman 1 yang tinggal selangkah ke 3 besar. Klik di posisi 1-3 rata-rata 3-5× lipat posisi 4-10.</p>
+  ${table([{k:'judul',t:'Judul'},{k:'client',t:'Klien'},{k:'pos',t:'Rank'},{k:'impr',t:'Impresi'},
+           {k:'clicks',t:'Klik'},{k:'ctr',t:'CTR %'},{k:'trend',t:'Tren'}],
+    rows.filter(a=>{const m=metrics(a);return m&&m.pos>3&&m.pos<=10;})
+        .sort((a,b)=>metrics(a).pos-metrics(b).pos).slice(0,60).map(a=>{
+      const m = metrics(a);
+      return `<tr><td><a href="${esc(a.live_url)}" target="_blank">${esc(a.judul)}</a></td>
+        <td class="small">${esc(a.client||'—')}</td><td><b>${dec(m.pos,1)}</b></td>
+        <td>${fmt(m.impr)}</td><td>${fmt(m.clicks)}</td><td>${dec(m.ctr)}</td>
+        <td>${m.weeks&&m.weeks.length>1?spark(m.weeks,'impr','#fbbf24'):''}</td></tr>`;
+    }).join('')||'<tr><td colspan="7" class="muted">Tidak ada.</td></tr>')}</div>
+
   <h2>Per Artikel</h2>
   ${table([{k:'judul',t:'Judul'},{k:'client',t:'Klien'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},
            {k:'ctr',t:'CTR %'},{k:'pos',t:'Rank'},{k:'trend',t:'Tren'}],
@@ -451,6 +539,12 @@ function bind(){
         window._qt=setTimeout(()=>{const p=q.selectionStart;render();
           const n=document.getElementById('f-q'); if(n){n.focus();n.setSelectionRange(p,p);}},250);};
   document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>sortBy(th.dataset.k));
+  const dl = document.getElementById('dl-pipeline');
+  if (dl) dl.onclick = () => downloadCsv('pipeline-artikel.csv',
+    ['Kategori','Klien','Bulan','Judul','Deadline','Status','Keyword','Draft','Live'],
+    filtered().map(a=>({Kategori:'', Klien:a.client||'', Bulan:a.month||'', Judul:a.judul,
+      Deadline:a.deadline_posting||'', Status:status(a), Keyword:a.keyword||'',
+      Draft:a.draft_url||'', Live:a.live_url||''})));
 }
 let sortState={};
 function sortBy(k){

@@ -14,8 +14,14 @@ COL = dict(no=0, klien=1, judul=2, deadline_draft=3, draft=4, revisi=5,
            deadline_posting=6, keterangan=7, live=8, seo_only=9, keyword=10,
            posisi=11, produk=12, referensi=13, outline=14, note=15)
 
+# Nama bulan campur: Inggris (May/June/July/August) + Indonesia (Februari/Maret).
 MONTH_RE = re.compile(r"^(January|February|March|April|May|June|July|August|"
-                      r"September|October|November|December)\s+(20\d\d)$")
+                      r"September|October|November|December|"
+                      r"Januari|Februari|Maret|Mei|Juni|Juli|Agustus|Oktober|"
+                      r"November|Desember)(?:\s+(20\d\d))?$")
+MONTH_ID = {"Januari": "January", "Februari": "February", "Maret": "March",
+            "Mei": "May", "Juni": "June", "Juli": "July", "Agustus": "August",
+            "Oktober": "October", "Desember": "December"}
 URL_RE = re.compile(r"https?://[^\s\"']+", re.I)
 
 # Nama klien di sheet tidak konsisten antar bulan -> kanonikalisasi.
@@ -105,7 +111,9 @@ def main():
         a = get("no")
         mm = MONTH_RE.match(a)
         if mm:
-            month = "%s %s" % (mm.group(1), mm.group(2))
+            nm = MONTH_ID.get(mm.group(1), mm.group(1))
+            yr = mm.group(2) or (month.split()[-1] if month else "2026")
+            month = "%s %s" % (nm, yr)
             client, kuota = None, None
             continue
         if not a.isdigit():
