@@ -273,6 +273,7 @@ function viewWork(){
       <div class="wt">${esc(x.q)}</div>
       <div class="muted small">${esc(x.domain)} • ${fmt(x.impr)} impresi/bln • rank ${dec(x.pos,1)}</div>
       <div class="muted small">skor ${x.score}</div></div>`).join('') || '<p class="muted small">Tidak ada kandidat.</p>';
+  const ideaDl = fi.length ? `<button id="dl-ideas" style="margin-top:8px;width:100%">⬇ Unduh ${fmt(fi.length)} ide (CSV)</button>` : '';
   const recoRows = fr.slice(0,15).map(r=>`<div class="witem">
       <div class="wt">${esc((r.a.judul||'').slice(0,64))}</div>
       <div class="muted small">${esc(r.a.client||'')} • ${r.issues.map(i=>i.t).join(', ')}</div>
@@ -290,6 +291,7 @@ function viewWork(){
       <div class="muted small">${esc(g.domain)} • ${g.n_kw} keyword dilaporkan${g.pos_manual!=null?' • posisi di laporan klien: '+g.pos_manual:''}</div>
       <div class="muted small">${esc(g.keyword||'')}</div></div>`).join('')
       || '<p class="muted small">Tidak ada temuan.</p>';
+  const gapDl = gaps.length ? `<button id="dl-gap" style="margin-top:8px;width:100%">⬇ Unduh ${fmt(gaps.length)} halaman (CSV)</button>` : '';
   return `
   <div class="ctl">
     <select id="f-site"><option value="">Semua website</option>${
@@ -297,11 +299,11 @@ function viewWork(){
     <span class="muted small">Antrean kerja — urut dampak, bukan urut tanggal</span>
   </div>
   <div class="wgrid">
-    ${col('①','MAU NULIS APA', fmt(fi.length)+' query besar yang halaman rankingnya BUKAN artikel dari kertas kerja lo — belum ada artikel yang menyasar', ideaRows)}
+    ${col('①','MAU NULIS APA', fmt(fi.length)+' query besar yang halaman rankingnya BUKAN artikel dari kertas kerja lo — belum ada artikel yang menyasar', ideaRows + ideaDl)}
     ${col('②','PERBAIKI APA', fmt(fr.length)+' artikel tayang yang bocor', recoRows)}
     ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor — '+esc(repDom||'')+' • posisi manual dari SERP/Ubersuggest/Semrush, beda metode dengan GSC',
        repRows + (repDom && rep.length?`<button id="dl-report" style="margin-top:8px;width:100%">⬇ Unduh laporan ${esc(repDom)}</button>`:''))}
-    ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows)}
+    ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows + gapDl)}
   </div>`;
 }
 
@@ -918,8 +920,22 @@ function bind(){
     F.site=b.dataset.dom; cur='site'; history.replaceState(null,'','#site'); render();});
   const fs=document.getElementById('f-site');
   if(fs) fs.onchange=()=>{F.site=fs.value;render();};
+  const di=document.getElementById('dl-ideas');
+  if(di) di.onclick=()=>{const dom=F.site;
+    downloadCsv('ide-konten'+(dom?'-'+dom:'')+'.csv',
+      ['Domain','Keyword','Impresi 90 hari','Klik','Rank terbaik','Halaman ranking saat ini','Skor'],
+      (dom?IDEAS.filter(x=>x.domain===dom):IDEAS).map(x=>({Domain:x.domain,Keyword:x.q,
+        'Impresi 90 hari':x.impr,'Klik':x.clicks,'Rank terbaik':x.pos,
+        'Halaman ranking saat ini':x.url,'Skor':x.score})));};
+  const dg=document.getElementById('dl-gap');
+  if(dg) dg.onclick=()=>{const dom=F.site;
+    downloadCsv('cek-laporan'+(dom?'-'+dom:'')+'.csv',
+      ['Domain','Halaman','Jml Keyword','Keyword dilaporkan','Posisi di laporan klien'],
+      (dom?LANDING_GAP.filter(g=>g.domain===dom):LANDING_GAP).map(g=>({Domain:g.domain,
+        Halaman:g.landing,'Jml Keyword':g.n_kw,'Keyword dilaporkan':g.keyword,
+        'Posisi di laporan klien':g.pos_manual==null?'':g.pos_manual})));};
   const dr=document.getElementById('dl-report');
-  if(dr) dr.onclick=()=>{const dom=F.site;
+  if(dr) dr.onclick=()=>{const dom=F.site || Object.keys(LAPORAN)[0] || '';
     downloadCsv('laporan-'+dom+'.csv',
       ['Produk','Landing Page','Keyword','Volume','Priority','Posisi Manual','Posisi GSC','Impresi GSC','Klik GSC'],
       reportRows(dom).map(r=>({Produk:r.produk,'Landing Page':r.landing,Keyword:r.keyword,
