@@ -15,3 +15,6 @@ preview.html
 
 # state laporan mingguan (lokal, bukan data dashboard)
 data/weekly_state.json
+
+# laporan bulanan klien (mentah, privat) - hanya di-parse ke data/laporan.json
+laporan/
