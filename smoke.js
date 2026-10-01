@@ -20,7 +20,7 @@ global.fetch = () => Promise.reject(new Error('no fetch'));
 
 const wrapped = code + `
 ;module.exports = { ARTICLES, BRANDS, CLIENTS, MONTHS, agg, status, metrics,
-  viewOverview, viewPipeline, viewPerforma, viewKeyword, viewBanding, viewMeta, viewStrategi, viewAksi, filtered, F };`;
+  viewPortfolio, viewSite, viewRekomendasi, viewOverview, viewPipeline, viewPerforma, viewKeyword, viewBanding, viewMeta, viewStrategi, viewAksi, filtered, F };`;
 
 const api = eval(wrapped);
 
@@ -29,6 +29,9 @@ const check = (name, fn) => {
   try { const out = fn(); console.log(`${name.padEnd(12)} ok  ${out.length} bytes`); }
   catch (e) { fail++; console.log(`${name.padEnd(12)} FAIL ${e.message}`); }
 };
+check('portfolio', api.viewPortfolio);
+check('site', api.viewSite);
+check('rekomendasi', api.viewRekomendasi);
 check('overview', api.viewOverview);
 check('pipeline', api.viewPipeline);
 check('performa', api.viewPerforma);

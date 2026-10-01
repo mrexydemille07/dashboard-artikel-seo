@@ -24,21 +24,88 @@ def main():
     tpl = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
     articles = load("articles.json", [])
     brands = load("brands.json", [])
-    gsc = load("gsc.json", {})
     audit = load("unindexed_audit.json", [])
     meta_audit = load("meta_audit.json", {})
-    # Pangkas ke URL artikel saja: gsc.json mentah ~33rb URL (10 MB), yang dipakai
-    # dashboard cuma yang ada di kertas kerja. Mentah tetap disimpan sbg gsc_raw.json.
-    if gsc:
-        import shutil
-        raw = os.path.join(DATA, "gsc_raw.json")
-        if not os.path.exists(raw):
-            shutil.copy(os.path.join(DATA, "gsc.json"), raw)
-        def norm(u):
-            s = (u or "").strip().lower().replace("http://", "https://").split("#")[0]
-            return s.rstrip("/")
-        want = {norm(a["live_url"]) for a in articles if a.get("live_url")}
-        gsc = {u: m for u, m in gsc.items() if norm(u) in want}
+    sites = load("sites.json", [])
+    sites_status = load("sites_status.json", [])
+
+    # gsc_raw.json = semua URL semua situs (~33rb, 30 MB). Dashboard butuh dua bentuk:
+    #   gsc.json        -> hanya URL artikel di kertas kerja (tab artikel)
+    #   domain_perf.json-> agregat per domain + halaman teratas (tab performa brand)
+    raw = load("gsc_raw.json", {})
+    if not raw:
+        raw = load("gsc.json", {})
+
+    def norm(u):
+        s = (u or "").strip().lower().replace("http://", "https://").split("#")[0]
+        return s.rstrip("/")
+
+    want = {norm(a["live_url"]) for a in articles if a.get("live_url")}
+    gsc = {u: m for u, m in raw.items() if norm(u) in want}
+
+    # agregat per domain dari SEMUA URL (bukan cuma artikel kertas kerja)
+    from urllib.parse import urlsplit
+    dom = {}
+    for u, m in raw.items():
+        h = urlsplit(u).netloc.lower().replace("www.", "")
+        d = dom.setdefault(h, {"urls": 0, "impr": 0, "clicks": 0, "posW": 0.0, "posN": 0,
+                               "top": [], "weeks": {}})
+        d["urls"] += 1
+        d["impr"] += m.get("impr", 0)
+        d["clicks"] += m.get("clicks", 0)
+        if m.get("pos"):
+            d["posW"] += m["pos"] * m.get("impr", 0)
+            d["posN"] += m.get("impr", 0)
+        d["top"].append({"u": u, "impr": m.get("impr", 0), "clicks": m.get("clicks", 0),
+                         "ctr": m.get("ctr", 0), "pos": m.get("pos", 0)})
+        for w in m.get("weeks", []):
+            a = d["weeks"].setdefault(w["w"], {"impr": 0, "clicks": 0, "posW": 0.0})
+            a["impr"] += w.get("impr", 0)
+            a["clicks"] += w.get("clicks", 0)
+            a["posW"] += w.get("pos", 0) * w.get("impr", 0)
+    for h, d in dom.items():
+        d["ctr"] = round(100 * d["clicks"] / d["impr"], 2) if d["impr"] else 0
+        d["pos"] = round(d["posW"] / d["posN"], 1) if d["posN"] else 0
+        d.pop("posW"); d.pop("posN")
+        d["top"].sort(key=lambda x: -x["impr"])
+        d["top"] = d["top"][:40]
+        d["weeks"] = [{"w": k, "impr": v["impr"], "clicks": v["clicks"],
+                       "ctr": round(100 * v["clicks"] / v["impr"], 2) if v["impr"] else 0,
+                       "pos": round(v["posW"] / v["impr"], 1) if v["impr"] else 0}
+                      for k, v in sorted(d["weeks"].items())]
+    domain_perf = dom
+
+    # Portfolio: satu baris per DOMAIN yang benar-benar dikerjakan.
+    st_by_dom = {s["domain"].replace("www.", ""): s for s in sites_status}
+    nama_by_dom = {}
+    for s in sites:
+        h = (s.get("wp") or "").split("//")[-1].split("/")[0].lower().replace("www.", "")
+        if h:
+            nama_by_dom.setdefault(h, s["nama"])
+    portfolio = []
+    for b in brands:
+        h = b["domain"]
+        st = st_by_dom.get(h, {})
+        dp = dom.get(h, {})
+        la = [a for a in articles if a.get("domain") == h]
+        portfolio.append({
+            "domain": h,
+            "nama": nama_by_dom.get(h) or b["client"],
+            "client": b["client"],
+            "artikel": len(la),
+            "posted": sum(1 for a in la if a.get("live_url")),
+            "dns": st.get("dns"), "http": st.get("http"),
+            "sitemap": st.get("sitemap"),
+            # punya properti GSC = ada data GSC untuk domain ini (lebih andal daripada
+            # baris sheet, karena 4 domain Proxsis tidak terdaftar di sheet portofolio)
+            "gsc_properti": bool(dp.get("urls")) or st.get("gsc"),
+            "laporan": st.get("laporan"),
+            "impr": dp.get("impr", 0), "clicks": dp.get("clicks", 0),
+            "ctr": dp.get("ctr", 0), "pos": dp.get("pos", 0), "urls_gsc": dp.get("urls", 0),
+            "wp": next((s["wp"] for s in sites
+                        if (s.get("wp") or "").split("//")[-1].split("/")[0].lower().replace("www.", "") == h), ""),
+        })
+    portfolio.sort(key=lambda x: -x["impr"])
     def norm(u):
         s = (u or "").strip().lower().replace("http://", "https://").split("#")[0]
         return s.rstrip("/")
@@ -58,6 +125,10 @@ def main():
                        ("/*__GSC__*/{}", js(gsc)),
                        ("/*__AUDIT__*/[]", js(audit)),
                       ("/*__META_AUDIT__*/{}", js(meta_audit)),
+                      ("/*__SITES__*/[]", js(sites)),
+                      ("/*__SITES_STATUS__*/[]", js(sites_status)),
+                      ("/*__DOMAIN_PERF__*/{}", js(domain_perf)),
+                      ("/*__PORTFOLIO__*/[]", js(portfolio)),
                        ("/*__META__*/{}", js(meta))):
         assert token in tpl, "token hilang dari template: " + token
         tpl = tpl.replace(token, val)

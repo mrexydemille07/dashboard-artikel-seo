@@ -65,6 +65,11 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 @media(max-width:820px){.two{grid-template-columns:1fr}}
 .spark{display:block}
 .btn-copy{font-size:11px;padding:4px 9px}
+.grid.k3{grid-template-columns:repeat(3,1fr)}
+.grid.sites{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card.site .row1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card.site .v{font-size:17px;font-weight:600;margin-top:2px}
+.btn-go{font-size:12px;padding:5px 10px;width:100%}
 .ok{color:var(--ok)}
 tr.meta-saran td{background:var(--panel2);border-bottom:1px solid var(--line);padding-top:4px;padding-bottom:8px}
 tr.meta-saran div{margin:2px 0}
@@ -88,6 +93,10 @@ const GSC      = /*__GSC__*/{};
 const AUDIT    = /*__AUDIT__*/[];   // hasil audit_unindexed.py (status HTTP/noindex/sitemap)
 const META = /*__META__*/{};
 const META_AUDIT = /*__META_AUDIT__*/{};
+const SITES    = /*__SITES__*/[];          // 17 website dari sheet portofolio
+const SITES_STATUS = /*__SITES_STATUS__*/[]; // DNS/HTTP/sitemap/GSC per website
+const DOMAIN_PERF  = /*__DOMAIN_PERF__*/{};  // agregat GSC per domain (semua URL)
+const PORTFOLIO = /*__PORTFOLIO__*/[];       // 1 baris per domain: kertas kerja + status + GSC
 
 const TODAY = new Date().toISOString().slice(0,10);
 const CUR_KEY = TODAY.slice(0,7);            // "2026-09"
@@ -196,6 +205,9 @@ function table(cols,rows,sortKey){
 
 /* ===== tabs ===== */
 const TABS = [
+  ['portfolio','🏠 Portofolio'],
+  ['site','🌐 Performa Website'],
+  ['rekomendasi','🎯 Rekomendasi'],
   ['overview','📊 Ringkasan'],
   ['pipeline','🏭 Pipeline Produksi'],
   ['performa','📈 Performa Artikel'],
@@ -205,15 +217,16 @@ const TABS = [
   ['strategi','🎯 Strategi Konten'],
   ['aksi','🛠️ Aksi & Perbaikan'],
 ];
-let cur = (location.hash || '').replace('#', '') || 'overview';
-if (!TABS.some(t => t[0] === cur)) cur = 'overview';
+let cur = (location.hash || '').replace('#', '') || 'portfolio';
+if (!TABS.some(t => t[0] === cur)) cur = 'portfolio';
 
-const F = {month:'', client:'', status:'', q:''};
+const F = {month:'', client:'', status:'', q:'', site:''};
 
 function render(){
   document.getElementById('tabs').innerHTML = TABS.map(([k,t])=>
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
+    portfolio:viewPortfolio, site:viewSite, rekomendasi:viewRekomendasi,
     overview:viewOverview, pipeline:viewPipeline, performa:viewPerforma,
     keyword:viewKeyword, banding:viewBanding, meta:viewMeta, strategi:viewStrategi, aksi:viewAksi}[cur])();
   bind();
@@ -225,6 +238,191 @@ function filtered(){
     (!F.client || a.client===F.client) &&
     (!F.status || status(a)===F.status) &&
     (!F.q || (a.judul+' '+(a.keyword||'')+' '+(a.client||'')).toLowerCase().includes(F.q.toLowerCase())));
+}
+
+/* ---------- 0. Portofolio (beranda) ---------- */
+function siteHealth(p){
+  if (p.dns === false) return {cls:'p-bad', t:'DOMAIN MATI'};
+  if (p.http && p.http >= 400) return {cls:'p-bad', t:'HTTP '+p.http};
+  if (!p.gsc_properti) return {cls:'p-warn', t:'TANPA GSC'};
+  if (p.sitemap === null && p.dns !== false) return {cls:'p-warn', t:'TANPA SITEMAP'};
+  return {cls:'p-ok', t:'SEHAT'};
+}
+// satu domain = satu sebab (prioritas tertinggi), biar 'perlu perhatian' tidak dobel hitung
+function healthCounts(list){
+  const c = {mati:0, nogsc:0, nositemap:0, http:0};
+  for (const p of list){
+    const t = siteHealth(p).t;
+    if (t==='DOMAIN MATI') c.mati++;
+    else if (t.startsWith('HTTP')) c.http++;
+    else if (t==='TANPA GSC') c.nogsc++;
+    else if (t==='TANPA SITEMAP') c.nositemap++;
+  }
+  return c;
+}
+function viewPortfolio(){
+  const list = PORTFOLIO.slice();
+  const tot = list.reduce((o,p)=>{o.impr+=p.impr;o.clicks+=p.clicks;o.art+=p.artikel;o.posted+=p.posted;return o;},
+    {impr:0,clicks:0,art:0,posted:0});
+  const hc = healthCounts(list);
+  const bad = hc.mati + hc.http + hc.nogsc + hc.nositemap;
+  const ctr = tot.impr ? (100*tot.clicks/tot.impr).toFixed(2) : 0;
+  const cards = list.map(p=>{
+    const h = siteHealth(p);
+    return `<div class="card site" data-dom="${esc(p.domain)}">
+      <div class="row1"><b>${esc(p.nama)}</b><span class="pill ${h.cls}">${h.t}</span></div>
+      <div class="muted small">${esc(p.domain)}</div>
+      <div class="grid k3" style="margin-top:8px">
+        <div><div class="lbl">Impresi</div><div class="v">${fmt(p.impr)}</div></div>
+        <div><div class="lbl">Klik</div><div class="v">${fmt(p.clicks)}</div></div>
+        <div><div class="lbl">CTR</div><div class="v">${dec(p.ctr,2)}%</div></div>
+      </div>
+      <div class="muted small" style="margin-top:6px">${p.posted}/${p.artikel} artikel posted • ${fmt(p.urls_gsc)} URL di GSC • rank ${dec(p.pos,1)}</div>
+      <div style="margin-top:8px"><button class="btn-go" data-dom="${esc(p.domain)}">Lihat detail →</button></div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="grid kpi">
+    ${kpi('Website aktif', fmt(list.length), 'domain yang dikerjakan')}
+    ${kpi('Total impresi', fmt(tot.impr), '90 hari, semua URL')}
+    ${kpi('Total klik', fmt(tot.clicks), 'CTR '+ctr+'%')}
+    ${kpi('Artikel posted', fmt(tot.posted)+' / '+fmt(ARTICLES.length), 'kertas kerja (yang belum tayang belum punya domain)')}
+    ${kpi('Perlu perhatian', fmt(bad), hc.mati+' domain mati • '+hc.nogsc+' tanpa GSC • '+hc.nositemap+' tanpa sitemap')}
+  </div>
+  <h2>🏠 Portofolio Website <span class="muted small">(urut impresi)</span></h2>
+  <div class="grid sites">${cards}</div>`;
+}
+
+/* ---------- 0b. Performa Website ---------- */
+function viewSite(){
+  const dom = F.site || (PORTFOLIO[0] && PORTFOLIO[0].domain);
+  if (!dom) return `<div class="card"><p class="muted">Belum ada website.</p></div>`;
+  const p = PORTFOLIO.find(x=>x.domain===dom) || {};
+  const dp = DOMAIN_PERF[dom] || {top:[],weeks:[],urls:0,impr:0,clicks:0,ctr:0,pos:0};
+  const arts = ARTICLES.filter(a=>a.domain===dom);
+  const o = agg(arts);
+  const wk = dp.weeks || [];
+  const top = (dp.top||[]).slice(0,25);
+  const rows = top.map(t=>`<tr>
+    <td class="small">${esc(t.u.replace(/^https?:\/\/[^/]+/,''))}</td>
+    <td>${fmt(t.impr)}</td><td>${fmt(t.clicks)}</td><td>${dec(t.ctr,2)}%</td><td>${dec(t.pos,1)}</td>
+    <td>${t.impr>=100&&t.ctr<1.5?'<span class="pill p-warn">CTR rendah</span>':''}
+        ${t.pos>10?'<span class="pill p-bad">di luar H1</span>':''}</td></tr>`).join('');
+  return `
+  <div class="ctl">
+    <select id="f-site"><option value="">— pilih website —</option>${
+      PORTFOLIO.map(x=>`<option value="${esc(x.domain)}"${x.domain===dom?' selected':''}>${esc(x.nama)}</option>`).join('')}</select>
+    <span class="muted small">${esc(dom)} • ${fmt(dp.urls)} URL di GSC</span>
+  </div>
+  <div class="grid kpi">
+    ${kpi('Impresi', fmt(dp.impr), '90 hari')}
+    ${kpi('Klik', fmt(dp.clicks), 'CTR '+dec(dp.ctr,2)+'%')}
+    ${kpi('Rank rata-rata', dec(dp.pos,1), 'semua URL')}
+    ${kpi('Artikel kertas kerja', fmt(o.posted)+' / '+fmt(o.n), 'posted / total')}
+    ${kpi('Top 3 / Halaman 1', fmt(o.top3)+' / '+fmt(o.page1), 'dari artikel yang punya metrik')}
+  </div>
+  <h2>Tren Mingguan</h2>
+  <div class="card">${wk.length?bars(wk.map(w=>({l:w.w.slice(4),v:w.impr})),{h:170}):'<p class="muted">Belum ada data mingguan.</p>'}</div>
+  <h2>Artikel Teratas di Website Ini <span class="muted small">(semua URL, bukan cuma kertas kerja)</span></h2>
+  <div class="card">${table([{k:'u',t:'URL'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR'},{k:'pos',t:'Rank'},{k:'x',t:'Catatan'}], rows)}</div>`;
+}
+
+/* ---------- 0c. Rekomendasi (artikel tidak perform / optimasi ulang) ---------- */
+function ageDays(a){
+  const d = a.deadline_posting || (a.month ? monthKey(a.month)+'-01' : '');
+  if (!d) return null;
+  const t = Date.parse(d);
+  return isNaN(t) ? null : Math.round((Date.now()-t)/86400000);
+}
+function decayOf(m){
+  const w = (m && m.weeks) || [];
+  if (w.length < 8) return null;
+  const B = w.slice(-4), A = w.slice(-8,-4);
+  const sb = B.reduce((s,x)=>s+x.clicks,0), sa = A.reduce((s,x)=>s+x.clicks,0);
+  if (sa < 10) return null;                       // sampel terlalu kecil
+  return {a:sa, b:sb, pct: Math.round(100*(sb-sa)/sa)};
+}
+// satu artikel bisa kena beberapa masalah; skor = perkiraan klik yang bisa diselamatkan
+function recoList(){
+  const out = [];
+  for (const a of ARTICLES){
+    if (!a.live_url) continue;
+    const m = metrics(a);
+    const age = ageDays(a);
+    const dk = decayOf(m);          // jangan 'dec' -> menimpa fungsi format dec()
+    const issues = [];
+    let score = 0;
+    if (!m || !m.impr){
+      issues.push({t:'Tidak ada impresi', why:'URL tidak muncul di GSC — cek indexing/sitemap', w:3});
+      score += 40;
+    } else {
+      if (m.impr >= 100 && m.ctr < 1.5){
+        issues.push({t:'CTR rendah', why:`${fmt(m.impr)} impresi tapi CTR ${dec(m.ctr,2)}% — judul/meta tidak menarik`, w:3});
+        score += Math.min(60, m.impr/1000);
+      }
+      if (m.pos > 3 && m.pos <= 10 && m.impr >= 50){
+        issues.push({t:'Peluang Top 3', why:`rank ${dec(m.pos,1)} — dorong sedikit, klik naik banyak`, w:2});
+        score += Math.min(40, m.impr/2000);
+      }
+      if (m.pos > 10 && m.impr >= 200){
+        issues.push({t:'Di luar halaman 1', why:`rank ${dec(m.pos,1)} dengan ${fmt(m.impr)} impresi — konten perlu diperkuat`, w:2});
+        score += Math.min(30, m.impr/3000);
+      }
+    }
+    if (dk && dk.pct <= -30){
+      issues.push({t:'Tren menurun', why:`klik turun ${Math.abs(dk.pct)}% (${fmt(dk.a)} → ${fmt(dk.b)} dalam 4 minggu)`, w:3});
+      score += Math.min(50, dk.a/50);
+    }
+    if (age != null && age > 180 && m && m.pos > 10){
+      issues.push({t:'Konten tua', why:`${Math.round(age/30)} bulan, rank ${dec(m.pos,1)} — refresh/update`, w:1});
+      score += 10;
+    }
+    if (issues.length) out.push({a, m, age, dk, issues, score: Math.round(score)});
+  }
+  out.sort((x,y)=>y.score-x.score);
+  return out;
+}
+function viewRekomendasi(){
+  const all = recoList();
+  const f = all.filter(r=>{
+    if (F.site && r.a.domain !== F.site) return false;
+    if (F.client && r.a.client !== F.client) return false;
+    if (F.q && !((r.a.judul||'')+' '+(r.a.keyword||'')).toLowerCase().includes(F.q.toLowerCase())) return false;
+    return true;
+  });
+  const byType = {};
+  for (const r of all) for (const i of r.issues) byType[i.t] = (byType[i.t]||0)+1;
+  const rows = f.slice(0,400).map(r=>{
+    const m = r.m || {};
+    return `<tr>
+      <td><b>${esc(r.a.client||'—')}</b><div class="muted small">${esc((r.a.judul||'').slice(0,72))}</div>
+          <div class="muted small">${esc((r.a.live_url||'').replace(/^https?:\/\/[^/]+/,''))}</div></td>
+      <td>${fmt(m.impr||0)}</td><td>${fmt(m.clicks||0)}</td>
+      <td>${m.ctr!=null?dec(m.ctr,2)+'%':'—'}</td><td>${m.pos!=null?dec(m.pos,1):'—'}</td>
+      <td class="small">${r.issues.map(i=>`<span class="pill p-warn" title="${esc(i.why)}">${esc(i.t)}</span>`).join(' ')}</td>
+      <td class="small">${r.issues.map(i=>`<div class="muted">• ${esc(i.why)}</div>`).join('')}</td>
+      <td><b>${r.score}</b></td></tr>`;
+  }).join('');
+  return `
+  <div class="ctl">
+    <select id="f-site"><option value="">Semua website</option>${
+      PORTFOLIO.map(x=>`<option value="${esc(x.domain)}"${x.domain===F.site?' selected':''}>${esc(x.nama)}</option>`).join('')}</select>
+    <select id="f-client"><option value="">Semua klien</option>${
+      CLIENTS.map(c=>`<option${F.client===c?' selected':''}>${esc(c)}</option>`).join('')}</select>
+    <input id="f-q" placeholder="cari judul / keyword…" value="${esc(F.q)}" style="min-width:200px">
+    <span class="muted small">${fmt(f.length)} artikel butuh tindakan</span>
+  </div>
+  <div class="grid kpi">
+    ${kpi('Butuh tindakan', fmt(all.length), 'dari '+fmt(ARTICLES.filter(a=>a.live_url).length)+' artikel tayang')}
+    ${kpi('CTR rendah', fmt(byType['CTR rendah']||0), 'impresi ada, klik tidak')}
+    ${kpi('Tren menurun', fmt(byType['Tren menurun']||0), 'klik turun ≥30% dalam 4 minggu')}
+    ${kpi('Peluang Top 3', fmt(byType['Peluang Top 3']||0), 'rank 4-10')}
+    ${kpi('Tanpa impresi', fmt(byType['Tidak ada impresi']||0), 'tidak muncul di GSC')}
+  </div>
+  <h2>🎯 Rekomendasi Tindakan <span class="muted small">(urut skor dampak)</span></h2>
+  <div class="card"><p class="muted small">Skor = perkiraan besarnya klik yang bisa diselamatkan. Arahkan kursor ke label untuk alasan lengkap.</p>
+  ${table([{k:'client',t:'Artikel'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR'},
+           {k:'pos',t:'Rank'},{k:'issues',t:'Masalah'},{k:'why',t:'Kenapa'},{k:'score',t:'Skor'}], rows)}</div>`;
 }
 
 /* ---------- 1. Ringkasan ---------- */
@@ -754,6 +952,10 @@ function bind(){
         window._qt=setTimeout(()=>{const p=q.selectionStart;render();
           const n=document.getElementById('f-q'); if(n){n.focus();n.setSelectionRange(p,p);}},250);};
   document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>sortBy(th.dataset.k));
+  document.querySelectorAll('.btn-go').forEach(b=>b.onclick=()=>{
+    F.site=b.dataset.dom; cur='site'; history.replaceState(null,'','#site'); render();});
+  const fs=document.getElementById('f-site');
+  if(fs) fs.onchange=()=>{F.site=fs.value;render();};
   document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=()=>{
     const txt='Title: '+b.dataset.t+'\nDescription: '+b.dataset.d;
     const done=()=>{b.textContent='Tersalin';setTimeout(()=>b.textContent='Salin',1400);};

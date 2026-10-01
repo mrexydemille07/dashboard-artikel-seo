@@ -1,4 +1,4 @@
-$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe build_data.py
+$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\python.exe build_data.py
 artikel     : 1326
 punya URL   : 999 (75%)
 domain      : 19
@@ -26,52 +26,52 @@ digital.proxsisgroup.com         Proxsis Digital            28
 infrasec.proxsisgroup.com        Infra Sec                   5
 infra.proxsisgroup.com           Proxsis Infra               5
 academy.proxsisgroup.com         Proxsis Academy             5
-$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe gsc_pull.py --all --days 90
+$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\python.exe gsc_pull.py --all --days 90
 24 properti terdaftar di GSC
 → sc-domain:synergysolusi.com
-   5852 URL
+   5868 URL
 → https://it.proxsisgroup.com/
-   1374 URL
+   1376 URL
 → https://itgid.org/
-   2747 URL
+   2756 URL
 → https://biztechacademy.id/
-   836 URL
+   837 URL
 → https://hr.proxsisgroup.com/
-   1192 URL
+   1196 URL
 → https://strategy.proxsisgroup.com/
    352 URL
 → https://environment-indonesia.com/
-   5195 URL
+   5216 URL
 → https://indonesiasafetycenter.org/
-   3360 URL
+   3369 URL
 → https://petrotrainingasia.com/
-   1788 URL
+   1789 URL
 → https://talkactive.co.id/
-   949 URL
+   950 URL
 → https://fs-institute.org/
-   848 URL
+   849 URL
 → https://isoindonesiacenter.com/
-   1434 URL
+   1437 URL
 → https://icicert.com/
    650 URL
 → https://grc-indonesia.com/
-   1782 URL
+   1793 URL
 → https://ipqi.org/
-   3345 URL
+   3352 URL
 → https://digital.proxsisgroup.com/
-   643 URL
+   644 URL
 → https://infrasec.proxsisgroup.com/
    419 URL
 → https://infra.proxsisgroup.com/
    2 URL
 → https://academy.proxsisgroup.com/
-   434 URL
-total 33202 URL di data/gsc.json
-$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe meta_audit.py
-target: 396 URL
-sudah ada: 395 | sisa: 0
+   435 URL
+total 33290 URL di data/gsc.json
+$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\python.exe meta_audit.py
+target: 395 URL
+sudah ada: 395 | sisa: 4
 
-selesai: 388 URL dianalisis, 7 gagal
+selesai: 392 URL dianalisis, 7 gagal
   description 156 karakter                      16
   description 159 karakter                      13
   description 158 karakter                      12
@@ -82,8 +82,8 @@ selesai: 388 URL dianalisis, 7 gagal
   title 62 karakter                             10
   title 104 karakter                            10
   title 76 karakter                             10
-$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe meta_fix.py
-dihitung ulang: 388 URL
+$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\python.exe meta_fix.py
+dihitung ulang: 392 URL
 
   Isocenter | slhs mbg adalah
     lama : Catat! 3 Sertifikat Wajib Dapur MBG, Bukan Syarat Administratif - ISOCENTER INDONESIA (85)
@@ -96,25 +96,25 @@ dihitung ulang: 388 URL
   Proxsis HR | info taspen kenaikan gaji pensiunan 2026 kapan cair
     lama : Cek Fakta Gaji Pensiunan Taspen 2026: Isu Rapel & Aturan PP 8/2024 - Proxsis HR (79)
     saran: Cek Fakta Gaji Pensiunan Taspen 2026: Isu Rapel & Aturan PP (59)
-$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe build.py
-index.html: 2866642 bytes | Data per 01 Oct 2026 00:12 • 1326 artikel • 23 klien • 856 artikel terhubung GSC (1147 URL di ekspor)
+$ C:\Users\MSI\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\python.exe build.py
+index.html: 2890902 bytes | Data per 01 Oct 2026 15:18 • 1326 artikel • 23 klien • 858 artikel terhubung GSC (1165 URL di ekspor)
 $ node smoke.js index.html
-overview     ok  16225 bytes
+overview     ok  16256 bytes
 pipeline     ok  354852 bytes
-performa     ok  309245 bytes
-keyword      ok  99577 bytes
-banding      ok  6629 bytes
-meta         ok  377124 bytes
-strategi     ok  93825 bytes
-aksi         ok  58156 bytes
+performa     ok  314911 bytes
+keyword      ok  99453 bytes
+banding      ok  6614 bytes
+meta         ok  376349 bytes
+strategi     ok  93178 bytes
+aksi         ok  58157 bytes
 
 articles: 1326 | clients: 23 | months: 10
-status: {"Belum mulai":159,"Draft":146,"Posted":999,"Overdue":22}
-agg: {"n":1326,"posted":999,"overdue":22,"draft":146,"kw":216,"cta":18,"outline":408,"impr":892570,"clicks":11864,"rankSum":6890.200000000004,"rankN":856,"withGsc":856,"top3":33,"page1":696,"page2":104,"page3":23,"ctr":1.33,"rank":8}
+status: {"Belum mulai":159,"Draft":145,"Posted":999,"Overdue":23}
+agg: {"n":1326,"posted":999,"overdue":23,"draft":145,"kw":216,"cta":18,"outline":408,"impr":903388,"clicks":12112,"rankSum":6892.200000000006,"rankN":858,"withGsc":858,"top3":33,"page1":698,"page2":104,"page3":23,"ctr":1.34,"rank":8}
 filter ARTIKEL CADANGAN January 2026 -> 0 rows
-filter Overdue -> 22 rows
-aksi(overdue) ok  58156 bytes
+filter Overdue -> 23 rows
+aksi(overdue) ok  58157 bytes
 $ git add -A
 $ git push -q origin main
 
-selesai: refresh data 2026-10-01 00:12
+selesai: refresh data 2026-10-01 15:18

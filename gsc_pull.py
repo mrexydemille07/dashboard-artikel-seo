@@ -159,7 +159,9 @@ def main():
     if not sites:
         sys.exit("kasih --site atau --all")
 
-    gsc_path = os.path.join(DATA, "gsc.json")
+    # Tulis ke gsc_raw.json (semua URL situs). build.py yang memangkas ke gsc.json
+    # (hanya URL artikel) supaya HTML tidak membengkak.
+    gsc_path = os.path.join(DATA, "gsc_raw.json")
     gsc = json.load(open(gsc_path, encoding="utf-8")) if os.path.exists(gsc_path) else {}
     for s in sites:
         print("→", s)
