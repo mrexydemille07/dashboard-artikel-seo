@@ -76,6 +76,7 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 .wcol h3{margin:0 0 4px;font-size:14px}
 .witem{border-top:1px solid var(--line);padding:8px 0}
 .witem:first-of-type{border-top:none}
+td.mx{background:rgba(248,113,113,.12)}
 .wt{font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ok{color:var(--ok)}
 tr.meta-saran td{background:var(--panel2);border-bottom:1px solid var(--line);padding-top:4px;padding-bottom:8px}
@@ -304,7 +305,9 @@ function viewWork(){
     ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor — '+esc(repDom||'')+' • posisi manual dari SERP/Ubersuggest/Semrush, beda metode dengan GSC',
        repRows + (repDom && rep.length?`<button id="dl-report" style="margin-top:8px;width:100%">⬇ Unduh laporan ${esc(repDom)}</button>`:''))}
     ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows + gapDl)}
-  </div>`;
+  </div>
+  <h2>Produksi per Brand per Bulan <span class="muted small">(kotak kosong = bulan itu tidak ada artikel — kelihatan brand yang bolong)</span></h2>
+  <div class="card">${prodMatrix()}</div>`;
 }
 
 /* ---------- 0. Portofolio (beranda) ---------- */
@@ -390,8 +393,88 @@ function viewSite(){
   </div>
   <h2>Tren Mingguan</h2>
   <div class="card">${wk.length?bars(wk.map(w=>({l:w.w.slice(4),v:w.impr})),{h:170}):'<p class="muted">Belum ada data mingguan.</p>'}</div>
+
+  <h2>Produksi Artikel per Bulan <span class="muted small">(kertas kerja — kelihatan bulan yang bolong)</span></h2>
+  <div class="card">${monthlyProd(arts)}</div>
+
+  <h2>Umur Artikel vs Performa <span class="muted small">(artikel umur berapa yang paling produktif di brand ini)</span></h2>
+  <div class="card">${agePerf(arts)}</div>
+
   <h2>Artikel Teratas di Website Ini <span class="muted small">(semua URL, bukan cuma kertas kerja)</span></h2>
   <div class="card">${table([{k:'u',t:'URL'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR'},{k:'pos',t:'Rank'},{k:'x',t:'Catatan'}], rows)}</div>`;
+}
+// matriks brand x bulan: sel = jumlah artikel posted; kosong = bolong
+function prodMatrix(){
+  const months = MONTHS.slice(-6);
+  const rows = PORTFOLIO.filter(p=>p.artikel>0);
+  const cells = [];
+  for (const p of rows){
+    const la = ARTICLES.filter(a=>a.domain===p.domain);
+    let tot = 0, miss = 0;
+    const tds = months.map(m=>{
+      const n = la.filter(a=>a.month===m && a.live_url).length;
+      tot += n; if (!n) miss++;
+      return `<td class="${n?'':'mx'}">${n||''}</td>`;
+    }).join('');
+    cells.push({k:-miss, html:`<tr><td>${esc(p.nama.slice(0,26))}</td>${tds}<td>${tot}</td>
+      <td>${miss?`<span class="pill p-warn">${miss} bolong</span>`:'<span class="pill p-ok">lengkap</span>'}</td></tr>`});
+  }
+  cells.sort((a,b)=>a.k-b.k);
+  return table([{k:'n',t:'Brand'}].concat(months.map(m=>({k:m,t:m.split(' ')[0].slice(0,3)})))
+    .concat([{k:'t',t:'Total'},{k:'s',t:'Status'}]), cells.map(c=>c.html));
+}
+
+// produksi per bulan: tabel angka + bar mini, biar pola bolong kelihatan
+function monthlyProd(arts){
+  const by = {};
+  for (const a of arts){
+    if (!a.month) continue;
+    const k = monthKey(a.month);
+    const e = by[k] = by[k] || {n:0, posted:0, impr:0, clicks:0};
+    e.n++;
+    if (a.live_url) e.posted++;
+    const m = metrics(a);
+    if (m){ e.impr += m.impr||0; e.clicks += m.clicks||0; }
+  }
+  const keys = Object.keys(by).sort();
+  if (!keys.length) return '<p class="muted">Belum ada data bulan.</p>';
+  const max = Math.max(1, ...keys.map(k=>by[k].n));
+  const rows = keys.map(k=>{
+    const e = by[k];
+    const ctr = e.impr ? (100*e.clicks/e.impr).toFixed(2) : '—';
+    return `<tr><td>${k}</td><td>${e.n}</td><td>${e.posted}</td>
+      <td>${fmt(e.impr)}</td><td>${fmt(e.clicks)}</td><td>${ctr}${ctr==='—'?'':'%'}</td>
+      <td style="width:180px"><div class="bar"><i style="width:${Math.round(100*e.n/max)}%"></i></div></td></tr>`;
+  }).join('');
+  return table([{k:'m',t:'Bulan'},{k:'n',t:'Artikel'},{k:'p',t:'Posted'},
+                {k:'i',t:'Impresi'},{k:'c',t:'Klik'},{k:'ctr',t:'CTR'},{k:'b',t:'Relatif'}], rows);
+}
+// umur artikel (dari bulan kertas kerja) vs performa rata-rata
+function agePerf(arts){
+  const buckets = [[0,2,'0-2 bulan'],[3,4,'3-4 bulan'],[5,6,'5-6 bulan'],[7,99,'7+ bulan']];
+  const acc = buckets.map(b=>({label:b[2], n:0, impr:0, clicks:0, pos:0, posN:0, withGsc:0}));
+  for (const a of arts){
+    const age = ageDays(a);
+    if (age == null) continue;
+    const mo = age/30;
+    const i = buckets.findIndex(b=>mo>=b[0] && mo<=b[1]);
+    if (i < 0) continue;
+    const e = acc[i];
+    e.n++;
+    const m = metrics(a);
+    if (m){ e.withGsc++; e.impr += m.impr||0; e.clicks += m.clicks||0;
+            if (m.pos){ e.pos += m.pos; e.posN++; } }
+  }
+  const rows = acc.filter(e=>e.n).map(e=>{
+    const ctr = e.impr ? (100*e.clicks/e.impr).toFixed(2) : '—';
+    const avgImpr = e.withGsc ? Math.round(e.impr/e.withGsc) : 0;
+    return `<tr><td>${e.label}</td><td>${e.n}</td><td>${e.withGsc}</td>
+      <td>${fmt(avgImpr)}</td><td>${fmt(e.impr)}</td><td>${fmt(e.clicks)}</td>
+      <td>${ctr}${ctr==='—'?'':'%'}</td><td>${e.posN?dec(e.pos/e.posN,1):'—'}</td></tr>`;
+  }).join('');
+  return table([{k:'a',t:'Umur'},{k:'n',t:'Artikel'},{k:'g',t:'Punya metrik'},
+                {k:'ai',t:'Impresi per artikel bermetrik'},{k:'i',t:'Total impresi'},{k:'c',t:'Klik'},
+                {k:'ctr',t:'CTR'},{k:'p',t:'Rank rata-rata'}], rows);
 }
 
 /* ---------- 0c. Rekomendasi (artikel tidak perform / optimasi ulang) ---------- */
