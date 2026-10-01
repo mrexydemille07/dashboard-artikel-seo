@@ -1396,13 +1396,11 @@
   "len_title": 67,
   "len_desc": 149,
   "issues": [
-   "title 67 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"ews score\" tidak ada di title",
-   "keyword \"ews score\" tidak ada di description"
+   "title 67 karakter (ideal ≤60) — terpotong di SERP"
   ],
   "saran_title": "Studi Kasus EWS Rumah Sakit, Ada Temuan Mengejutkan",
-  "saran_desc": "Simak ews score: Studi kasus penerapan EWS rumah sakit mengungkap celah antara deteksi risiko dan respons. Pelajari manajemen risiko klinis & tata kelola…",
-  "keyword": "ews score"
+  "saran_desc": "Studi kasus penerapan EWS rumah sakit mengungkap celah antara deteksi risiko dan respons. Pelajari manajemen risiko klinis & tata kelola GRC di sini!",
+  "keyword": ""
  },
  "https://synergysolusi.com/artikel-qhse/sertifikasi-k3-lapangan-wajib-perusahaan/": {
   "judul": "Daftar Sertifikasi K3 Kemnaker yang Wajib Dimiliki Pekerja Industri Risiko Tinggi",
@@ -1767,7 +1765,7 @@
   ],
   "saran_title": "14 Bahaya Forklift Tersembunyi yang Wajib Diidentifikasi",
   "saran_desc": "Ketahui 14 potensi bahaya forklift tersembunyi di warehouse dan cara pengendaliannya menggunakan Job Safety Analysis (JSA) untuk cegah kecelakaan.",
-  "keyword": "bahaya forklift"
+  "keyword": ""
  },
  "https://ipqi.org/cara-memahami-supply-chain-management-scm-dengan-sederhana/": {
   "judul": "Cara Memahami Supply Chain Management dengan Sederhana",
@@ -2744,11 +2742,12 @@
   "len_desc": 144,
   "issues": [
    "title 86 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"menyembuhkannya\" tidak ada di description"
+   "keyword \"masalah hr manajer\" tidak ada di title",
+   "keyword \"masalah hr manajer\" tidak ada di description"
   ],
-  "saran_title": "12 ‘Penyakit’ HR yang Bikin Bisnis Macet dan Solusi untuk",
-  "saran_desc": "Simak menyembuhkannya: Hadapi tingginya turnover hingga drama payroll? Ini 12 masalah HR yang paling sering merugikan perusahaan beserta solusi modern…",
-  "keyword": "menyembuhkannya"
+  "saran_title": "Masalah hr manajer — 12 ‘Penyakit’ HR yang Bikin Bisnis",
+  "saran_desc": "Simak masalah hr manajer: Hadapi tingginya turnover hingga drama payroll? Ini 12 masalah HR yang paling sering merugikan perusahaan beserta solusi modern…",
+  "keyword": "masalah hr manajer"
  },
  "https://environment-indonesia.com/bbm-pirolisis-plastik-pp-amdk/": {
   "judul": "Alasan Limbah Plastik PP Adalah Bahan Baku Terbaik untuk BBM Pirolisis",
@@ -3329,12 +3328,11 @@
   "issues": [
    "title 100 karakter (ideal ≤60) — terpotong di SERP",
    "description 166 karakter (ideal ≤155)",
-   "keyword \"managed security services\" tidak ada di title",
-   "keyword \"managed security services\" tidak ada di description"
+   "keyword \"solusi keamanan siber\" tidak ada di description"
   ],
   "saran_title": "Managed Detection and Response (MDR): Solusi Keamanan Siber",
-  "saran_desc": "Simak managed security services: Ingin proteksi siber 24/7 tanpa biaya mahal SOC in-house? Pelajari cara kerja Managed Detection and Response (MDR) untuk…",
-  "keyword": "managed security services"
+  "saran_desc": "Simak solusi keamanan siber: Ingin proteksi siber 24/7 tanpa biaya mahal SOC in-house? Pelajari cara kerja Managed Detection and Response (MDR) untuk…",
+  "keyword": "solusi keamanan siber"
  },
  "https://petrotrainingasia.com/pelatihan-rigger-migas-cegah-kecelakaan-fatal/": {
   "judul": "Pelatihan Rigger Migas: Cukupkah Cegah Kecelakaan Fatal?",
@@ -4061,12 +4059,12 @@
   "len_desc": 149,
   "issues": [
    "title 74 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"cara menghitung abk pegawai\" tidak ada di title",
-   "keyword \"cara menghitung abk pegawai\" tidak ada di description"
+   "keyword \"perhitungan abk\" tidak ada di title",
+   "keyword \"perhitungan abk\" tidak ada di description"
   ],
-  "saran_title": "Cara Menghitung Analisis Beban Kerja (ABK) Akurat dan",
-  "saran_desc": "Simak cara menghitung abk pegawai: Pelajari cara menghitung analisis beban kerja (ABK) yang akurat untuk mencegah karyawan burnout dan mengoptimalkan…",
-  "keyword": "cara menghitung abk pegawai"
+  "saran_title": "Perhitungan abk — Cara Menghitung Analisis Beban Kerja",
+  "saran_desc": "Simak perhitungan abk: Pelajari cara menghitung analisis beban kerja (ABK) yang akurat untuk mencegah karyawan burnout dan mengoptimalkan biaya…",
+  "keyword": "perhitungan abk"
  },
  "https://it.proxsisgroup.com/inilah-strategi-enterprise-architecture-consulting-di-bank-digital-terkemuka/": {
   "judul": "Inilah Strategi Enterprise Architecture Consulting di Bank Digital Terkemuka",
@@ -4228,12 +4226,12 @@
   "len_desc": 155,
   "issues": [
    "title 117 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"berdasarkan data root cause product loss apa kategori masalah terbesar yang menyebabkan product loss\" tidak ada di title",
-   "keyword \"berdasarkan data root cause product loss apa kategori masalah terbesar yang menyebabkan product loss\" tidak ada di description"
+   "keyword \"permasalahan supply chain management\" tidak ada di title",
+   "keyword \"permasalahan supply chain management\" tidak ada di description"
   ],
   "saran_title": "Mengatasi Gangguan Rantai Pasok: Pendekatan Root Cause",
-  "saran_desc": "Root Cause Analysis (RCA) membantu mengatasi gangguan supply chain 2026 dengan metode Fishbone, 5 Whys, dan FMEA untuk meningkatkan ketahanan rantai pasok.",
-  "keyword": "berdasarkan data root cause product loss apa kategori masalah terbesar yang menyebabkan product loss"
+  "saran_desc": "Simak permasalahan supply chain management: Root Cause Analysis (RCA) membantu mengatasi gangguan supply chain 2026 dengan metode Fishbone, 5 Whys, dan…",
+  "keyword": "permasalahan supply chain management"
  },
  "https://hr.proxsisgroup.com/skill-trainer-profesional/": {
   "judul": "5 Skill Utama untuk Transformasi dari Pembicara Biasa Menjadi Trainer Profesional",
@@ -7152,12 +7150,12 @@
   "len_desc": 147,
   "issues": [
    "title 95 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"ai untuk hrd\" tidak ada di title",
-   "keyword \"ai untuk hrd\" tidak ada di description"
+   "keyword \"ai in talent acquisition\" tidak ada di title",
+   "keyword \"ai in talent acquisition\" tidak ada di description"
   ],
   "saran_title": "Rekrutmen Cerdas Pakai AI yang Tetap Humanis: Panduan",
-  "saran_desc": "Simak ai untuk hrd: Terapkan AI dalam rekrutmen tanpa kehilangan sentuhan manusia. Temukan tips cerdas, humanis, dan efisien untuk menyaring kandidat top…",
-  "keyword": "ai untuk hrd"
+  "saran_desc": "Simak ai in talent acquisition: Terapkan AI dalam rekrutmen tanpa kehilangan sentuhan manusia. Temukan tips cerdas, humanis, dan efisien untuk menyaring…",
+  "keyword": "ai in talent acquisition"
  },
  "https://digital.proxsisgroup.com/cara-cerdas-bangun-side-hustle-pakai-ai/": {
   "judul": "Cara Cerdas Bangun Side Hustle Pakai AI Agar Cepat Dilirik Rekruiter.",
@@ -7253,13 +7251,11 @@
   "len_desc": 164,
   "issues": [
    "title 84 karakter (ideal ≤60) — terpotong di SERP",
-   "description 164 karakter (ideal ≤155)",
-   "keyword \"comptia security+ exam\" tidak ada di title",
-   "keyword \"comptia security+ exam\" tidak ada di description"
+   "description 164 karakter (ideal ≤155)"
   ],
   "saran_title": "Study Plan Terbaik untuk Lulus Ujian Sertifikasi CompTIA",
-  "saran_desc": "Simak comptia security+ exam: Ikuti study plan terbaik untuk lulus ujian sertifikasi CompTIA Security+. Pelajari materi krusial selama 8 minggu dan…",
-  "keyword": "comptia security+ exam"
+  "saran_desc": "Ikuti study plan terbaik untuk lulus ujian sertifikasi CompTIA Security+. Pelajari materi krusial selama 8 minggu dan persiapkan diri Anda dengan cara…",
+  "keyword": "sertifikasi comptia"
  },
  "https://biztechacademy.id/panduan-lengkap-karier-soc-analyst-tugas-skill-gaji/": {
   "judul": "SOC Analyst: Garda Depan Keamanan Siber yang Kekurangan Orang di Indonesia",
@@ -7915,5 +7911,85 @@
   "saran_title": "Menggeser Paradigma Audit, Saat Audit Internal Jadi Jantung",
   "saran_desc": "Simak audit iso 9001 adalah: Audit internal ISO 9001 bukan sekadar cek dokumen. Pelajari perannya dalam menemukan akar masalah, mendorong perbaikan, dan…",
   "keyword": "audit iso 9001 adalah"
+ },
+ "https://ipqi.org/lean-management-adalah-konsep-tujuan-dan-penerapannya/": {
+  "judul": "Lean Management Adalah: Konsep, Tujuan, dan Penerapannya dalam Berbagai Bidang",
+  "client": "IPQI",
+  "impr": 949,
+  "clicks": 14,
+  "ctr": 1.48,
+  "pos": 8.5,
+  "title": "Lean Management Adalah: Konsep, Tujuan, dan Penerapannya dalam Berbagai Bidang - IPQI",
+  "desc": "Lean management adalah pendekatan manajemen untuk meningkatkan efisiensi dengan mengurangi pemborosan. Pelajari konsep, tujuan, prinsip, metode, dan contoh penerapannya di berbagai bidang.",
+  "h1": "Lean Management Adalah: Konsep, Tujuan, dan Penerapannya dalam Berbagai Bidang",
+  "len_title": 85,
+  "len_desc": 188,
+  "issues": [
+   "title 85 karakter (ideal ≤60) — terpotong di SERP",
+   "description 188 karakter (ideal ≤155)"
+  ],
+  "saran_title": "Lean Management Adalah: Konsep, Tujuan, dan Penerapannya",
+  "saran_desc": "Lean management adalah pendekatan manajemen untuk meningkatkan efisiensi dengan mengurangi pemborosan. Pelajari konsep, tujuan, prinsip, metode, dan…",
+  "keyword": "lean management adalah"
+ },
+ "https://petrotrainingasia.com/sertifikasi-operator-crane-putar-tetap-pedestal-crane-bnsp/": {
+  "judul": "Pastikan Keamanan Operasi Lifting Anda dengan Sertifikasi Pengoperasian Crane Putar Tetap (Pedestal Crane) BNSP",
+  "client": "Petrotraining",
+  "impr": 699,
+  "clicks": 10,
+  "ctr": 1.43,
+  "pos": 7.4,
+  "title": "Sertifikasi Operator Pedestal Crane BNSP: Standar Keselamatan Wajib di Industri Migas - Petro Training Asia",
+  "desc": "Pedestal crane di fasilitas offshore dan kilang memiliki risiko yang tidak dimiliki crane lain. Pelajari mengapa Sertifikasi Operator Crane Putar Tetap BNSP wajib dan apa yang harus dikuasai operator.",
+  "h1": "Sertifikasi Operator Pedestal Crane BNSP: Standar Keselamatan Wajib di Industri Migas",
+  "len_title": 107,
+  "len_desc": 200,
+  "issues": [
+   "title 107 karakter (ideal ≤60) — terpotong di SERP",
+   "description 200 karakter (ideal ≤155)"
+  ],
+  "saran_title": "Sertifikasi Operator Pedestal Crane BNSP: Standar",
+  "saran_desc": "Pedestal crane di fasilitas offshore dan kilang memiliki risiko yang tidak dimiliki crane lain. Pelajari mengapa Sertifikasi Operator Crane Putar Tetap…",
+  "keyword": ""
+ },
+ "https://synergysolusi.com/artikel-qhse/ijazah-elektro-tanpa-lisensi-k3-listrik-risiko-regulasi/": {
+  "judul": "Punya Ijazah Elektro: Mengapa Masih Wajib Lisensi K3 Listrik?",
+  "client": "SSI",
+  "impr": 277,
+  "clicks": 4,
+  "ctr": 1.44,
+  "pos": 4.8,
+  "title": "Ijazah Elektro Tanpa Lisensi K3 Listrik: Risiko & Aturannya",
+  "desc": "Ijazah Teknik Elektro tidak otomatis memberi hak kerja pada instalasi tegangan. Ini dasar regulasi lisensi K3 listrik, risksinya, dan jalur pengakuan kompetensinya.",
+  "h1": "Punya Ijazah Elektro tapi Tanpa Lisensi K3 Listrik? Ini Risiko & Regulasi Pentingnya!",
+  "len_title": 59,
+  "len_desc": 164,
+  "issues": [
+   "description 164 karakter (ideal ≤155)"
+  ],
+  "saran_title": "Ijazah Elektro Tanpa Lisensi K3 Listrik",
+  "saran_desc": "Ijazah Teknik Elektro tidak otomatis memberi hak kerja pada instalasi tegangan. Ini dasar regulasi lisensi K3 listrik, risksinya, dan jalur pengakuan…",
+  "keyword": ""
+ },
+ "https://it.proxsisgroup.com/biaya-mahal-kebobolan-serangan-siber/": {
+  "judul": "Berapa Biaya Rata-Rata Serangan Siber terhadap Perusahaan di Indonesia?",
+  "client": "Proxsis IT",
+  "impr": 101,
+  "clicks": 1,
+  "ctr": 0.99,
+  "pos": 8.0,
+  "title": "Biaya Mahal Sebuah Kebobolan: Berapa Harga Serangan Siber? - IT Proxsis Group",
+  "desc": "Jangan tunggu lumpuh! Simak \"gunung es\" kerugian serangan siber bagi perusahaan, biaya tersembunyi, dan solusi pencegahannya di sini.",
+  "h1": "Biaya Mahal Sebuah Kebobolan: Berapa Harga Serangan Siber?",
+  "len_title": 77,
+  "len_desc": 133,
+  "issues": [
+   "title 77 karakter (ideal ≤60) — terpotong di SERP",
+   "keyword \"harga sebuah tebusan\" tidak ada di title",
+   "keyword \"harga sebuah tebusan\" tidak ada di description"
+  ],
+  "saran_title": "Biaya Mahal Sebuah Kebobolan: Berapa Harga Serangan Siber?",
+  "saran_desc": "Simak harga sebuah tebusan: Jangan tunggu lumpuh! Simak \"gunung es\" kerugian serangan siber bagi perusahaan, biaya tersembunyi, dan solusi pencegahannya…",
+  "keyword": "harga sebuah tebusan"
  }
 }
