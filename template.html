@@ -77,6 +77,7 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 .witem{border-top:1px solid var(--line);padding:8px 0}
 .witem:first-of-type{border-top:none}
 td.mx{background:rgba(248,113,113,.12)}
+td.nm{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wt{font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ok{color:var(--ok)}
 tr.meta-saran td{background:var(--panel2);border-bottom:1px solid var(--line);padding-top:4px;padding-bottom:8px}
@@ -209,6 +210,7 @@ const TABS = [
   ['work','⚡ Antrean Kerja'],
   ['site','🌐 Performa Website'],
   ['keyword','🔑 Keyword'],
+  ['report','📄 Laporan Klien'],
   ['aksi','🛠️ Aksi'],
 ];
 let cur = (location.hash || '').replace('#', '') || 'work';
@@ -220,7 +222,7 @@ function render(){
   document.getElementById('tabs').innerHTML = TABS.map(([k,t])=>
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
-    work:viewWork, site:viewSite, keyword:viewKeyword, aksi:viewAksi}[cur])();
+    work:viewWork, site:viewSite, keyword:viewKeyword, report:viewReport, aksi:viewAksi}[cur])();
   bind();
 }
 
@@ -416,7 +418,7 @@ function prodMatrix(){
       tot += n; if (!n) miss++;
       return `<td class="${n?'':'mx'}">${n||''}</td>`;
     }).join('');
-    cells.push({k:-miss, html:`<tr><td>${esc(p.nama.slice(0,26))}</td>${tds}<td>${tot}</td>
+    cells.push({k:-miss, html:`<tr><td class="nm" title="${esc(p.nama)}">${esc(p.nama)}</td>${tds}<td>${tot}</td>
       <td>${miss?`<span class="pill p-warn">${miss} bolong</span>`:'<span class="pill p-ok">lengkap</span>'}</td></tr>`});
   }
   cells.sort((a,b)=>a.k-b.k);
@@ -475,6 +477,59 @@ function agePerf(arts){
   return table([{k:'a',t:'Umur'},{k:'n',t:'Artikel'},{k:'g',t:'Punya metrik'},
                 {k:'ai',t:'Impresi per artikel bermetrik'},{k:'i',t:'Total impresi'},{k:'c',t:'Klik'},
                 {k:'ctr',t:'CTR'},{k:'p',t:'Rank rata-rata'}], rows);
+}
+
+/* ---------- LAPORAN KLIEN (format laporan manual + angka GSC) ---------- */
+function viewReport(){
+  const doms = Object.keys(LAPORAN);
+  if (!doms.length) return '<div class="card"><p class="muted">Belum ada laporan manual.</p></div>';
+  const dom = F.site || doms[0];
+  const rows = reportRows(dom);
+  const top3 = rows.filter(r=>r.posGsc!=='' && r.posGsc<=3).length;
+  const h1 = rows.filter(r=>r.posGsc!=='' && r.posGsc>3 && r.posGsc<=10).length;
+  const worse = rows.filter(r=>r.posGsc!=='' && r.posManual!=='' && r.posGsc-r.posManual>=4).length;
+  const gone = rows.filter(r=>r.posGsc==='').length;
+  const impr = rows.reduce((s,r)=>s+(r.impr||0),0), clk = rows.reduce((s,r)=>s+(r.clicks||0),0);
+  const body = rows.map(r=>{
+    const d = (r.posGsc!=='' && r.posManual!=='') ? r.posGsc - r.posManual : null;
+    const st = r.posGsc==='' ? '<span class="pill p-bad">tak muncul di GSC</span>'
+      : d===null ? '<span class="pill p-dim">tanpa angka manual</span>'
+      : d>=4 ? `<span class="pill p-warn">melorot ${dec(d,1)}</span>`
+      : d<=-4 ? `<span class="pill p-ok">membaik ${dec(-d,1)}</span>`
+      : '<span class="pill p-dim">stabil</span>';
+    return `<tr>
+      <td><b>${esc(r.produk||'—')}</b><div class="muted small">${esc((r.landing||'').replace(/^https?:\/\/[^/]+/,''))}</div></td>
+      <td>${esc(r.keyword)}</td>
+      <td>${r.vol||'—'}</td>
+      <td>${r.posManual===''?'—':r.posManual}</td>
+      <td>${r.posGsc===''?'—':dec(r.posGsc,1)}</td>
+      <td>${fmt(r.impr||0)}</td><td>${fmt(r.clicks||0)}</td>
+      <td>${st}</td></tr>`;
+  }).join('');
+  return `
+  <div class="ctl">
+    <select id="f-site"><option value="">— pilih brand —</option>${
+      doms.map(x=>`<option value="${esc(x)}"${x===dom?' selected':''}>${esc(x)}</option>`).join('')}</select>
+    <button id="dl-report">⬇ Unduh CSV laporan ini</button>
+    <button id="dl-report-all">⬇ Unduh SEMUA brand (1 file)</button>
+  </div>
+  <div class="grid kpi">
+    ${kpi('Keyword dilacak', fmt(rows.length), esc(dom))}
+    ${kpi('Top 3 (GSC)', fmt(top3), 'posisi nyata Google')}
+    ${kpi('Halaman 1 (GSC)', fmt(h1), 'posisi 4-10 (Top 3 dihitung terpisah)')}
+    ${kpi('Melorot vs laporan', fmt(worse), 'GSC ≥4 posisi lebih buruk')}
+    ${kpi('Tak muncul di GSC', fmt(gone), 'halaman tidak terdeteksi 90 hari')}
+  </div>
+  <h2>Laporan ${esc(dom)} <span class="muted small">• ${fmt(impr)} impresi • ${fmt(clk)} klik • 90 hari</span></h2>
+  <div class="card"><p class="muted small">Kolom Volume &amp; Posisi manual = angka yang lo laporkan (SERP check/Ubersuggest/Semrush). Kolom GSC = data nyata Google. Beda metode, jadi selisih itu wajar — tapi yang kirim ke klien harus konsisten satu sumber.</p>
+  ${table([{k:'produk',t:'Produk / Halaman'},{k:'keyword',t:'Keyword'},{k:'vol',t:'Vol (manual)'},
+           {k:'posManual',t:'Posisi (laporan)'},{k:'posGsc',t:'Posisi (GSC)'},{k:'impr',t:'Impresi'},
+           {k:'clicks',t:'Klik'},{k:'st',t:'Status'}], body)}</div>`;
+}
+function reportCsvRows(dom){
+  return reportRows(dom).map(r=>({Brand:dom, Produk:r.produk, 'Landing Page':r.landing, Keyword:r.keyword,
+    'Volume (manual)':r.vol, 'Posisi (laporan)':r.posManual, 'Posisi (GSC)':r.posGsc,
+    'Impresi GSC':r.impr, 'Klik GSC':r.clicks}));
 }
 
 /* ---------- 0c. Rekomendasi (artikel tidak perform / optimasi ulang) ---------- */
@@ -1017,13 +1072,16 @@ function bind(){
       (dom?LANDING_GAP.filter(g=>g.domain===dom):LANDING_GAP).map(g=>({Domain:g.domain,
         Halaman:g.landing,'Jml Keyword':g.n_kw,'Keyword dilaporkan':g.keyword,
         'Posisi di laporan klien':g.pos_manual==null?'':g.pos_manual})));};
+  const dr2=document.getElementById('dl-report-all');
+  if(dr2) dr2.onclick=()=>{
+    const all=[]; for(const d of Object.keys(LAPORAN)) all.push(...reportCsvRows(d));
+    downloadCsv('laporan-semua-brand.csv',
+      ['Brand','Produk','Landing Page','Keyword','Volume (manual)','Posisi (laporan)','Posisi (GSC)','Impresi GSC','Klik GSC'], all);};
   const dr=document.getElementById('dl-report');
   if(dr) dr.onclick=()=>{const dom=F.site || Object.keys(LAPORAN)[0] || '';
     downloadCsv('laporan-'+dom+'.csv',
-      ['Produk','Landing Page','Keyword','Volume','Priority','Posisi Manual','Posisi GSC','Impresi GSC','Klik GSC'],
-      reportRows(dom).map(r=>({Produk:r.produk,'Landing Page':r.landing,Keyword:r.keyword,
-        Volume:r.vol,Priority:r.prio,'Posisi Manual':r.posManual,'Posisi GSC':r.posGsc,
-        'Impresi GSC':r.impr,'Klik GSC':r.clicks})));};
+      ['Brand','Produk','Landing Page','Keyword','Volume (manual)','Posisi (laporan)','Posisi (GSC)','Impresi GSC','Klik GSC'],
+      reportCsvRows(dom));};
   document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=()=>{
     const txt='Title: '+b.dataset.t+'\nDescription: '+b.dataset.d;
     const done=()=>{b.textContent='Tersalin';setTimeout(()=>b.textContent='Salin',1400);};

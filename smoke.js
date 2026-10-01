@@ -20,7 +20,7 @@ global.fetch = () => Promise.reject(new Error('no fetch'));
 
 const wrapped = code + `
 ;module.exports = { ARTICLES, BRANDS, CLIENTS, MONTHS, agg, status, metrics,
-  viewWork, viewSite, viewKeyword, viewAksi, filtered, F, LAPORAN, IDEAS, LANDING_GAP };`;
+  viewWork, viewSite, viewKeyword, viewReport, viewAksi, filtered, F, LAPORAN, IDEAS, LANDING_GAP };`;
 
 const api = eval(wrapped);
 
@@ -33,6 +33,7 @@ const check = (name, fn) => {
 check('work', api.viewWork);
 check('site', api.viewSite);
 check('keyword', api.viewKeyword);
+check('report', api.viewReport);
 check('aksi', api.viewAksi);
 check('laporan', () => { const n = Object.keys(api.LAPORAN).length;
   if (!n) throw new Error('LAPORAN kosong'); return 'x'.repeat(n); });
