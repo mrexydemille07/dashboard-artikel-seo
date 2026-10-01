@@ -24,7 +24,15 @@ def head(url):
 
 
 def main():
-    sites = json.load(open(os.path.join(DATA, "sites.json"), encoding="utf-8"))
+    raw = json.load(open(os.path.join(DATA, "sites.json"), encoding="utf-8"))
+    # sites.json boleh menyimpan link admin (bahan kerja lokal); di sini kita turunkan
+    # ke domain saja. Jangan pernah menulis 'wp' ke file yang ikut ke repo.
+    import re as _re
+    def _dom(u):
+        m = _re.search(r"https?://([^/\s]+)", u or "")
+        return m.group(1).lower().replace("www.", "") if m else ""
+    sites = [{"no": s["no"], "nama": s["nama"], "wp": "https://" + _dom(s.get("wp")) + "/",
+              "laporan": s.get("laporan")} for s in raw]
     gsc = json.load(open(os.path.join(DATA, "gsc.json"), encoding="utf-8"))
     arts = json.load(open(os.path.join(DATA, "articles.json"), encoding="utf-8"))
 

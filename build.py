@@ -26,12 +26,8 @@ def main():
     brands = load("brands.json", [])
     audit = load("unindexed_audit.json", [])
     meta_audit = load("meta_audit.json", {})
-    # SITES dipakai dashboard hanya untuk nama + domain. Link REDACTED & link laporan
-    # TIDAK ikut: repo ini publik.
-    sites = [{"no": s["no"], "nama": s["nama"],
-              "domain": (s.get("wp") or "").split("//")[-1].split("/")[0].lower().replace("www.", ""),
-              "laporan": bool(s.get("laporan"))}
-             for s in load("sites.json", [])]
+    # sites.json sudah bersih (tanpa link REDACTED) — lihat sanitize di sites_status.py
+    sites = load("sites.json", [])
     sites_status = load("sites_status.json", [])
     laporan = load("laporan.json", {})
 
