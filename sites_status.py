@@ -47,7 +47,8 @@ def main():
     out = []
     for s in sites:
         dom = domain_of(s["wp"])
-        row = {"no": s["no"], "nama": s["nama"], "domain": dom, "wp": s["wp"],
+        # 'wp' (link admin) sengaja tidak disimpan: file ini ikut ke repo publik
+        row = {"no": s["no"], "nama": s["nama"], "domain": dom,
                "laporan": bool(s["laporan"]), "artikel": n_art.get(dom, 0)}
         try:
             socket.getaddrinfo(dom, None)

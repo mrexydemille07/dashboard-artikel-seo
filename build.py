@@ -26,7 +26,12 @@ def main():
     brands = load("brands.json", [])
     audit = load("unindexed_audit.json", [])
     meta_audit = load("meta_audit.json", {})
-    sites = load("sites.json", [])
+    # SITES dipakai dashboard hanya untuk nama + domain. Link REDACTED & link laporan
+    # TIDAK ikut: repo ini publik.
+    sites = [{"no": s["no"], "nama": s["nama"],
+              "domain": (s.get("wp") or "").split("//")[-1].split("/")[0].lower().replace("www.", ""),
+              "laporan": bool(s.get("laporan"))}
+             for s in load("sites.json", [])]
     sites_status = load("sites_status.json", [])
 
     # gsc_raw.json = semua URL semua situs (~33rb, 30 MB). Dashboard butuh dua bentuk:
@@ -79,9 +84,8 @@ def main():
     st_by_dom = {s["domain"].replace("www.", ""): s for s in sites_status}
     nama_by_dom = {}
     for s in sites:
-        h = (s.get("wp") or "").split("//")[-1].split("/")[0].lower().replace("www.", "")
-        if h:
-            nama_by_dom.setdefault(h, s["nama"])
+        if s.get("domain"):
+            nama_by_dom.setdefault(s["domain"], s["nama"])
     portfolio = []
     for b in brands:
         h = b["domain"]
