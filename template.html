@@ -206,15 +206,9 @@ function table(cols,rows,sortKey){
 /* ===== tabs ===== */
 const TABS = [
   ['work','⚡ Antrean Kerja'],
-  ['portfolio','🏠 Portofolio'],
   ['site','🌐 Performa Website'],
-  ['rekomendasi','🎯 Rekomendasi'],
-  ['pipeline','🏭 Pipeline Produksi'],
-  ['performa','📈 Performa Artikel'],
-  ['keyword','🔑 Keyword & Kanibalisasi'],
-  ['banding','🔁 Banding Periode'],
-  ['meta','✍️ Perbaikan Meta'],
-  ['aksi','🛠️ Aksi & Perbaikan'],
+  ['keyword','🔑 Keyword'],
+  ['aksi','🛠️ Aksi'],
 ];
 let cur = (location.hash || '').replace('#', '') || 'work';
 if (!TABS.some(t => t[0] === cur)) cur = 'work';
@@ -225,9 +219,7 @@ function render(){
   document.getElementById('tabs').innerHTML = TABS.map(([k,t])=>
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
-    work:viewWork, portfolio:viewPortfolio, site:viewSite, rekomendasi:viewRekomendasi,
-    pipeline:viewPipeline, performa:viewPerforma,
-    keyword:viewKeyword, banding:viewBanding, meta:viewMeta, aksi:viewAksi}[cur])();
+    work:viewWork, site:viewSite, keyword:viewKeyword, aksi:viewAksi}[cur])();
   bind();
 }
 
@@ -307,7 +299,7 @@ function viewWork(){
   <div class="wgrid">
     ${col('①','MAU NULIS APA', fmt(fi.length)+' query besar yang halaman rankingnya BUKAN artikel dari kertas kerja lo — belum ada artikel yang menyasar', ideaRows)}
     ${col('②','PERBAIKI APA', fmt(fr.length)+' artikel tayang yang bocor', recoRows)}
-    ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor ke klien — '+esc(repDom||''),
+    ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor — '+esc(repDom||'')+' • posisi manual dari SERP/Ubersuggest/Semrush, beda metode dengan GSC',
        repRows + (repDom && rep.length?`<button id="dl-report" style="margin-top:8px;width:100%">⬇ Unduh laporan ${esc(repDom)}</button>`:''))}
     ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows)}
   </div>`;

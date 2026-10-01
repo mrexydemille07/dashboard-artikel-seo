@@ -20,7 +20,7 @@ global.fetch = () => Promise.reject(new Error('no fetch'));
 
 const wrapped = code + `
 ;module.exports = { ARTICLES, BRANDS, CLIENTS, MONTHS, agg, status, metrics,
-  viewWork, viewPortfolio, viewSite, viewRekomendasi, viewPipeline, viewPerforma, viewKeyword, viewBanding, viewMeta, viewAksi, filtered, F, LAPORAN };`;
+  viewWork, viewSite, viewKeyword, viewAksi, filtered, F, LAPORAN, IDEAS, LANDING_GAP };`;
 
 const api = eval(wrapped);
 
@@ -29,18 +29,17 @@ const check = (name, fn) => {
   try { const out = fn(); console.log(`${name.padEnd(12)} ok  ${out.length} bytes`); }
   catch (e) { fail++; console.log(`${name.padEnd(12)} FAIL ${e.message}`); }
 };
+// 4 tab yang benar-benar dipakai (sisanya sudah dibuang dari TABS)
 check('work', api.viewWork);
-check('portfolio', api.viewPortfolio);
 check('site', api.viewSite);
-check('rekomendasi', api.viewRekomendasi);
+check('keyword', api.viewKeyword);
+check('aksi', api.viewAksi);
 check('laporan', () => { const n = Object.keys(api.LAPORAN).length;
   if (!n) throw new Error('LAPORAN kosong'); return 'x'.repeat(n); });
-check('pipeline', api.viewPipeline);
-check('performa', api.viewPerforma);
-check('keyword', api.viewKeyword);
-check('banding', api.viewBanding);
-check('meta', api.viewMeta);
-check('aksi', api.viewAksi);
+check('ideas', () => { const n = api.IDEAS.length;
+  if (!n) throw new Error('IDEAS kosong'); return 'x'.repeat(n); });
+check('gap', () => { const n = api.LANDING_GAP.length;
+  if (!n) throw new Error('LANDING_GAP kosong'); return 'x'.repeat(n); });
 
 console.log('\narticles:', api.ARTICLES.length, '| clients:', api.CLIENTS.length, '| months:', api.MONTHS.length);
 const st = {};
