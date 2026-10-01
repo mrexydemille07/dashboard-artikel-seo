@@ -70,6 +70,13 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 .card.site .row1{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .card.site .v{font-size:17px;font-weight:600;margin-top:2px}
 .btn-go{font-size:12px;padding:5px 10px;width:100%}
+.wgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1000px){.wgrid{grid-template-columns:1fr}}
+.wcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.wcol h3{margin:0 0 4px;font-size:14px}
+.witem{border-top:1px solid var(--line);padding:8px 0}
+.witem:first-of-type{border-top:none}
+.wt{font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ok{color:var(--ok)}
 tr.meta-saran td{background:var(--panel2);border-bottom:1px solid var(--line);padding-top:4px;padding-bottom:8px}
 tr.meta-saran div{margin:2px 0}
@@ -97,6 +104,8 @@ const SITES    = /*__SITES__*/[];          // 17 website dari sheet portofolio
 const SITES_STATUS = /*__SITES_STATUS__*/[]; // DNS/HTTP/sitemap/GSC per website
 const DOMAIN_PERF  = /*__DOMAIN_PERF__*/{};  // agregat GSC per domain (semua URL)
 const PORTFOLIO = /*__PORTFOLIO__*/[];       // 1 baris per domain: kertas kerja + status + GSC
+const IDEAS     = /*__IDEAS__*/[];           // ide konten: query GSC yang belum punya artikel
+const LANDING_GAP = /*__LANDING_GAP__*/[];   // halaman dilaporkan ke klien tapi tak muncul di GSC
 const LAPORAN   = /*__LAPORAN__*/{};         // domain -> {keyword: [posisi, vol, priority, landing, produk]}
 
 const TODAY = new Date().toISOString().slice(0,10);
@@ -196,6 +205,7 @@ function table(cols,rows,sortKey){
 
 /* ===== tabs ===== */
 const TABS = [
+  ['work','⚡ Antrean Kerja'],
   ['portfolio','🏠 Portofolio'],
   ['site','🌐 Performa Website'],
   ['rekomendasi','🎯 Rekomendasi'],
@@ -206,8 +216,8 @@ const TABS = [
   ['meta','✍️ Perbaikan Meta'],
   ['aksi','🛠️ Aksi & Perbaikan'],
 ];
-let cur = (location.hash || '').replace('#', '') || 'portfolio';
-if (!TABS.some(t => t[0] === cur)) cur = 'portfolio';
+let cur = (location.hash || '').replace('#', '') || 'work';
+if (!TABS.some(t => t[0] === cur)) cur = 'work';
 
 const F = {month:'', client:'', status:'', q:'', site:''};
 
@@ -215,7 +225,7 @@ function render(){
   document.getElementById('tabs').innerHTML = TABS.map(([k,t])=>
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
-    portfolio:viewPortfolio, site:viewSite, rekomendasi:viewRekomendasi,
+    work:viewWork, portfolio:viewPortfolio, site:viewSite, rekomendasi:viewRekomendasi,
     pipeline:viewPipeline, performa:viewPerforma,
     keyword:viewKeyword, banding:viewBanding, meta:viewMeta, aksi:viewAksi}[cur])();
   bind();
@@ -227,6 +237,80 @@ function filtered(){
     (!F.client || a.client===F.client) &&
     (!F.status || status(a)===F.status) &&
     (!F.q || (a.judul+' '+(a.keyword||'')+' '+(a.client||'')).toLowerCase().includes(F.q.toLowerCase())));
+}
+
+/* ---------- WORK QUEUE (rombak: antrean kerja solo) ---------- */
+function queryIndex(){
+  // domain -> {query: {impr,clicks,pos,url}} dari GSC (URL artikel kertas kerja)
+  const by = {};
+  for (const [u,m] of Object.entries(GSC)){
+    let h; try { h = new URL(u).hostname.toLowerCase().replace(/^www\./,''); } catch(e){ continue; }
+    const q = by[h] = by[h] || {};
+    for (const x of (m.queries||[])){
+      const k = (x.q||'').toLowerCase().trim();
+      if (!k || (k.length<6 && !k.includes(' '))) continue;
+      if (/^(site|inurl|intitle|link|cache|related):/.test(k)) continue;
+      const e = q[k] || (q[k] = {impr:0,clicks:0,pos:99,url:u});
+      e.impr += x.impr; e.clicks += x.clicks; e.pos = Math.min(e.pos, x.pos);
+    }
+  }
+  return by;
+}
+function ideaList(){ return IDEAS; }   // dihitung di build.py dari gsc_raw (semua URL situs)
+function reportRows(dom){
+  // susun ulang format laporan manual lo; posisi/impr/klik GSC sudah ditempel build.py
+  const L = LAPORAN[dom] || {};
+  const rows = [];
+  for (const [k,arr] of Object.entries(L)){
+    const [posManual, vol, prio, landing, produk, posG, imprG, clickG] = arr;
+    rows.push({produk: produk||'', landing: landing||'', keyword:k,
+      vol: vol||'', prio: prio||'', posManual: posManual==null?'':posManual,
+      posGsc: posG==null?'':posG, impr: imprG==null?0:imprG, clicks: clickG==null?0:clickG});
+  }
+  rows.sort((a,b)=>(b.impr||0)-(a.impr||0));
+  return rows;
+}
+function viewWork(){
+  const ideas = ideaList();
+  const recos = recoList();
+  const dom = F.site;
+  const fi = dom ? ideas.filter(x=>x.domain===dom) : ideas;
+  const fr = dom ? recos.filter(r=>r.a.domain===dom) : recos;
+  const col = (n,title,sub,body) => `<div class="wcol"><h3>${n} ${title}</h3><p class="muted small">${sub}</p>${body}</div>`;
+  const ideaRows = fi.slice(0,15).map(x=>`<div class="witem">
+      <div class="wt">${esc(x.q)}</div>
+      <div class="muted small">${esc(x.domain)} • ${fmt(x.impr)} impresi/bln • rank ${dec(x.pos,1)}</div>
+      <div class="muted small">skor ${x.score}</div></div>`).join('') || '<p class="muted small">Tidak ada kandidat.</p>';
+  const recoRows = fr.slice(0,15).map(r=>`<div class="witem">
+      <div class="wt">${esc((r.a.judul||'').slice(0,64))}</div>
+      <div class="muted small">${esc(r.a.client||'')} • ${r.issues.map(i=>i.t).join(', ')}</div>
+      <div class="muted small">skor ${r.score}</div></div>`).join('') || '<p class="muted small">Tidak ada.</p>';
+  // domain pertama yang PUNYA laporan manual (SSI/SSP formatnya beda, tidak ada di LAPORAN)
+  const repDom = dom || Object.keys(LAPORAN)[0] || '';
+  const rep = repDom ? reportRows(repDom) : [];
+  const repRows = rep.slice(0,10).map(r=>`<div class="witem">
+      <div class="wt">${esc(r.keyword)}</div>
+      <div class="muted small">manual ${r.posManual||'—'} → GSC ${r.posGsc||'—'} • vol ${r.vol||'—'} • ${fmt(r.impr||0)} impresi</div></div>`).join('')
+      || `<p class="muted small">Keyword belum tercatat di laporan manual domain ini.</p>`;
+  const gaps = dom ? LANDING_GAP.filter(g=>g.domain===dom) : LANDING_GAP;
+  const gapRows = gaps.slice(0,12).map(g=>`<div class="witem">
+      <div class="wt">${esc((g.landing||'').replace(/^https?:\/\/[^/]+/,''))}</div>
+      <div class="muted small">${esc(g.domain)} • ${g.n_kw} keyword dilaporkan${g.pos_manual!=null?' • posisi di laporan klien: '+g.pos_manual:''}</div>
+      <div class="muted small">${esc(g.keyword||'')}</div></div>`).join('')
+      || '<p class="muted small">Tidak ada temuan.</p>';
+  return `
+  <div class="ctl">
+    <select id="f-site"><option value="">Semua website</option>${
+      PORTFOLIO.map(x=>`<option value="${esc(x.domain)}"${x.domain===dom?' selected':''}>${esc(x.nama)}</option>`).join('')}</select>
+    <span class="muted small">Antrean kerja — urut dampak, bukan urut tanggal</span>
+  </div>
+  <div class="wgrid">
+    ${col('①','MAU NULIS APA', fmt(fi.length)+' query besar yang halaman rankingnya BUKAN artikel dari kertas kerja lo — belum ada artikel yang menyasar', ideaRows)}
+    ${col('②','PERBAIKI APA', fmt(fr.length)+' artikel tayang yang bocor', recoRows)}
+    ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor ke klien — '+esc(repDom||''),
+       repRows + (repDom && rep.length?`<button id="dl-report" style="margin-top:8px;width:100%">⬇ Unduh laporan ${esc(repDom)}</button>`:''))}
+    ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows)}
+  </div>`;
 }
 
 /* ---------- 0. Portofolio (beranda) ---------- */
@@ -842,6 +926,13 @@ function bind(){
     F.site=b.dataset.dom; cur='site'; history.replaceState(null,'','#site'); render();});
   const fs=document.getElementById('f-site');
   if(fs) fs.onchange=()=>{F.site=fs.value;render();};
+  const dr=document.getElementById('dl-report');
+  if(dr) dr.onclick=()=>{const dom=F.site;
+    downloadCsv('laporan-'+dom+'.csv',
+      ['Produk','Landing Page','Keyword','Volume','Priority','Posisi Manual','Posisi GSC','Impresi GSC','Klik GSC'],
+      reportRows(dom).map(r=>({Produk:r.produk,'Landing Page':r.landing,Keyword:r.keyword,
+        Volume:r.vol,Priority:r.prio,'Posisi Manual':r.posManual,'Posisi GSC':r.posGsc,
+        'Impresi GSC':r.impr,'Klik GSC':r.clicks})));};
   document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=()=>{
     const txt='Title: '+b.dataset.t+'\nDescription: '+b.dataset.d;
     const done=()=>{b.textContent='Tersalin';setTimeout(()=>b.textContent='Salin',1400);};
