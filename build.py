@@ -102,8 +102,8 @@ def main():
             "laporan": st.get("laporan"),
             "impr": dp.get("impr", 0), "clicks": dp.get("clicks", 0),
             "ctr": dp.get("ctr", 0), "pos": dp.get("pos", 0), "urls_gsc": dp.get("urls", 0),
-            "wp": next((s["wp"] for s in sites
-                        if (s.get("wp") or "").split("//")[-1].split("/")[0].lower().replace("www.", "") == h), ""),
+            # link REDACTED sengaja TIDAK ikut: repo ini publik, URL admin tidak perlu tayang
+            "url": "https://" + h + "/",
         })
     portfolio.sort(key=lambda x: -x["impr"])
     def norm(u):
