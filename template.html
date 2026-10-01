@@ -278,7 +278,7 @@ function viewWork(){
       <div class="muted small">skor ${x.score}</div></div>`).join('') || '<p class="muted small">Tidak ada kandidat.</p>';
   const ideaDl = fi.length ? `<button id="dl-ideas" style="margin-top:8px;width:100%">⬇ Unduh ${fmt(fi.length)} ide (CSV)</button>` : '';
   const recoRows = fr.slice(0,15).map(r=>`<div class="witem">
-      <div class="wt">${esc((r.a.judul||'').slice(0,64))}</div>
+      <div class="wt" title="${esc(r.a.judul||r.a.live_url||'')}">${esc((r.a.judul||r.a.live_url||'(tanpa judul)').slice(0,64))}</div>
       <div class="muted small">${esc(r.a.client||'')} • ${r.issues.map(i=>i.t).join(', ')}</div>
       <div class="muted small">skor ${r.score}</div></div>`).join('') || '<p class="muted small">Tidak ada.</p>';
   // domain pertama yang PUNYA laporan manual (SSI/SSP formatnya beda, tidak ada di LAPORAN)
