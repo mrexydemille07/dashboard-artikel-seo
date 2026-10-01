@@ -20,7 +20,7 @@ global.fetch = () => Promise.reject(new Error('no fetch'));
 
 const wrapped = code + `
 ;module.exports = { ARTICLES, BRANDS, CLIENTS, MONTHS, agg, status, metrics,
-  viewPortfolio, viewSite, viewRekomendasi, viewOverview, viewPipeline, viewPerforma, viewKeyword, viewBanding, viewMeta, viewStrategi, viewAksi, filtered, F };`;
+  viewPortfolio, viewSite, viewRekomendasi, viewPipeline, viewPerforma, viewKeyword, viewBanding, viewMeta, viewAksi, filtered, F, LAPORAN };`;
 
 const api = eval(wrapped);
 
@@ -32,13 +32,13 @@ const check = (name, fn) => {
 check('portfolio', api.viewPortfolio);
 check('site', api.viewSite);
 check('rekomendasi', api.viewRekomendasi);
-check('overview', api.viewOverview);
+check('laporan', () => { const n = Object.keys(api.LAPORAN).length;
+  if (!n) throw new Error('LAPORAN kosong'); return 'x'.repeat(n); });
 check('pipeline', api.viewPipeline);
 check('performa', api.viewPerforma);
 check('keyword', api.viewKeyword);
 check('banding', api.viewBanding);
 check('meta', api.viewMeta);
-check('strategi', api.viewStrategi);
 check('aksi', api.viewAksi);
 
 console.log('\narticles:', api.ARTICLES.length, '| clients:', api.CLIENTS.length, '| months:', api.MONTHS.length);

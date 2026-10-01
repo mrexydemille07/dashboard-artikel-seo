@@ -23,6 +23,7 @@ def main():
     with urllib.request.urlopen(SHEET, timeout=60) as r:
         open(os.path.join(HERE, "sheet0.csv"), "wb").write(r.read())
     run([sys.executable, "build_data.py"])
+    run([sys.executable, "parse_laporan.py"])
 
     # 2) GSC (butuh token lokal; kalau kedaluwarsa, jalankan auth_gsc.py manual)
     run([sys.executable, "gsc_pull.py", "--all", "--days", "90"])

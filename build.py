@@ -2,7 +2,7 @@
 
 Ponytail: satu file output, tanpa bundler. Jalankan ulang tiap kali data berubah.
 """
-import json, os, datetime
+import json, os, datetime, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
@@ -33,6 +33,7 @@ def main():
               "laporan": bool(s.get("laporan"))}
              for s in load("sites.json", [])]
     sites_status = load("sites_status.json", [])
+    laporan = load("laporan.json", {})
 
     # gsc_raw.json = semua URL semua situs (~33rb, 30 MB). Dashboard butuh dua bentuk:
     #   gsc.json        -> hanya URL artikel di kertas kerja (tab artikel)
@@ -109,6 +110,23 @@ def main():
             # link REDACTED sengaja TIDAK ikut: repo ini publik, URL admin tidak perlu tayang
             "url": "https://" + h + "/",
         })
+    # LAPORAN: laporan manual -> peta keyword-nya-keyword -> posisi manual, per domain.
+    # Bukan sumber metrik (GSC yang resmi); dipakai sebagai kolom pembanding di tab Keyword.
+    def nkw(s):
+        return re.sub(r"\s+", " ", str(s or "").strip().lower())
+
+    laporan_map = {}
+    for d, rows in laporan.items():
+        m = {}
+        for r in rows:
+            k = nkw(r["keyword"])
+            if k and k not in m:      # baris pertama = paling baru dilaporkan
+                m[k] = [r["posisi"], r["vol"], r["priority"], r["landing"], r["produk"]]
+        if m:
+            laporan_map[d] = m
+    print("laporan: %d domain, %d keyword" % (
+        len(laporan_map), sum(len(v) for v in laporan_map.values())))
+
     portfolio.sort(key=lambda x: -x["impr"])
     def norm(u):
         s = (u or "").strip().lower().replace("http://", "https://").split("#")[0]
@@ -133,6 +151,7 @@ def main():
                       ("/*__SITES_STATUS__*/[]", js(sites_status)),
                       ("/*__DOMAIN_PERF__*/{}", js(domain_perf)),
                       ("/*__PORTFOLIO__*/[]", js(portfolio)),
+                      ("/*__LAPORAN__*/{}", js(laporan_map)),
                        ("/*__META__*/{}", js(meta))):
         assert token in tpl, "token hilang dari template: " + token
         tpl = tpl.replace(token, val)

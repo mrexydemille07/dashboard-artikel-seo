@@ -97,6 +97,7 @@ const SITES    = /*__SITES__*/[];          // 17 website dari sheet portofolio
 const SITES_STATUS = /*__SITES_STATUS__*/[]; // DNS/HTTP/sitemap/GSC per website
 const DOMAIN_PERF  = /*__DOMAIN_PERF__*/{};  // agregat GSC per domain (semua URL)
 const PORTFOLIO = /*__PORTFOLIO__*/[];       // 1 baris per domain: kertas kerja + status + GSC
+const LAPORAN   = /*__LAPORAN__*/{};         // domain -> {keyword: [posisi, vol, priority, landing, produk]}
 
 const TODAY = new Date().toISOString().slice(0,10);
 const CUR_KEY = TODAY.slice(0,7);            // "2026-09"
@@ -179,16 +180,6 @@ function spark(weeks,key,color){
   return `<svg class="spark" viewBox="0 0 100 30" width="90" height="26" preserveAspectRatio="none">
     <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`;
 }
-function posBuckets(list){
-  const b = {'Top 3':0, 'Halaman 1 (4-10)':0, 'Halaman 2 (11-20)':0, 'Halaman 3+ (>20)':0};
-  for (const a of (list||ARTICLES)){
-    const m = metrics(a); if (!m) continue;
-    const p = m.pos||0; if (!p) continue;
-    if (p<=3) b['Top 3']++; else if (p<=10) b['Halaman 1 (4-10)']++;
-    else if (p<=20) b['Halaman 2 (11-20)']++; else b['Halaman 3+ (>20)']++;
-  }
-  return b;
-}
 function downloadCsv(name, cols, rows){
   const q = v => '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
   const csv = '\ufeff' + [cols.map(q).join(',')].concat(
@@ -208,13 +199,11 @@ const TABS = [
   ['portfolio','🏠 Portofolio'],
   ['site','🌐 Performa Website'],
   ['rekomendasi','🎯 Rekomendasi'],
-  ['overview','📊 Ringkasan'],
   ['pipeline','🏭 Pipeline Produksi'],
   ['performa','📈 Performa Artikel'],
   ['keyword','🔑 Keyword & Kanibalisasi'],
   ['banding','🔁 Banding Periode'],
   ['meta','✍️ Perbaikan Meta'],
-  ['strategi','🎯 Strategi Konten'],
   ['aksi','🛠️ Aksi & Perbaikan'],
 ];
 let cur = (location.hash || '').replace('#', '') || 'portfolio';
@@ -227,8 +216,8 @@ function render(){
     `<div class="tab${k===cur?' on':''}" data-tab="${k}">${t}</div>`).join('');
   document.getElementById('view').innerHTML = ({
     portfolio:viewPortfolio, site:viewSite, rekomendasi:viewRekomendasi,
-    overview:viewOverview, pipeline:viewPipeline, performa:viewPerforma,
-    keyword:viewKeyword, banding:viewBanding, meta:viewMeta, strategi:viewStrategi, aksi:viewAksi}[cur])();
+    pipeline:viewPipeline, performa:viewPerforma,
+    keyword:viewKeyword, banding:viewBanding, meta:viewMeta, aksi:viewAksi}[cur])();
   bind();
 }
 
@@ -425,101 +414,6 @@ function viewRekomendasi(){
            {k:'pos',t:'Rank'},{k:'issues',t:'Masalah'},{k:'why',t:'Kenapa'},{k:'score',t:'Skor'}], rows)}</div>`;
 }
 
-/* ---------- 1. Ringkasan ---------- */
-function viewOverview(){
-  const all = agg(ARTICLES);
-  const byMonth = MONTHS.map(m=>{
-    const l = ARTICLES.filter(a=>a.month===m); const o = agg(l);
-    return {m, ...o};
-  });
-  const byClient = CLIENTS.map(c=>{
-    const l = ARTICLES.filter(a=>a.client===c); return {c, ...agg(l)};
-  }).sort((a,b)=>b.n-a.n);
-  const gscReady = Object.keys(GSC).length>0;
-
-  return `
-  <div class="grid kpi">
-    ${kpi('Total Artikel', fmt(all.n), MONTHS.length+' bulan • '+CLIENTS.length+' klien')}
-    ${kpi('Sudah Posting', fmt(all.posted), pct(all.posted,all.n)+'% dari total', pct(all.posted,all.n))}
-    ${kpi('Overdue', fmt(all.overdue), 'deadline lewat, belum posting', null)}
-    ${kpi('Masih Draft', fmt(all.draft), 'punya draft, belum posting')}
-    ${kpi('Ada Keyword', fmt(all.kw), pct(all.kw,all.n)+'% terisi')}
-    ${kpi('Ada CTA Produk', fmt(all.cta), pct(all.cta,all.n)+'% terisi')}
-    ${gscReady?kpi('Impresi GSC', fmt(all.impr), all.withGsc+' artikel terhubung'):''}
-    ${gscReady?kpi('Klik GSC', fmt(all.clicks), 'CTR '+all.ctr+'%'):''}
-    ${gscReady?kpi('Rank rata-rata', all.rank||'—', 'semakin kecil semakin baik'):''}
-    ${gscReady?kpi('Top 3 Google', fmt(all.top3), pct(all.top3,all.withGsc)+'% dari '+all.withGsc+' artikel berdata'):''}
-    ${gscReady?kpi('Halaman 1 (4-10)', fmt(all.page1), 'target naik ke Top 3'):''}
-    ${gscReady?kpi('Halaman 2+', fmt(all.page2+all.page3), 'perlu dorongan konten'):''}
-  </div>
-
-  ${gscReady?`<h2>Distribusi Posisi Google</h2>
-  <div class="card">${bars(Object.entries(posBuckets()).map(([l,v])=>({l, v})), {color:'#34d399'})}
-    <p class="muted small">Dari ${all.withGsc} artikel yang punya data GSC. Semakin banyak di Top 3, semakin besar trafik organik.</p></div>`:''}
-
-  <h2>Produksi per Bulan</h2>
-  <div class="card">${bars(byMonth.map(o=>({l:o.m.split(' ')[0].slice(0,3)+' '+o.m.split(' ')[1].slice(2), v:o.n})))}</div>
-
-  <h2>Kuota vs Realisasi — Bulan Berjalan</h2>
-  ${viewKuota()}
-
-  <h2>Produksi per Penulis</h2>
-  ${viewPenulis()}
-
-  <h2>Kinerja per Klien</h2>
-  ${table(
-    [{k:'c',t:'Klien'},{k:'n',t:'Artikel'},{k:'posted',t:'Posted'},{k:'overdue',t:'Overdue'},
-     {k:'draft',t:'Draft'},{k:'kw',t:'Keyword'},{k:'cta',t:'CTA'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR %'},{k:'rank',t:'Rank'}],
-    byClient.map(o=>`<tr>
-      <td><b>${esc(o.c)}</b></td><td>${o.n}</td>
-      <td><span class="pill p-ok">${o.posted}</span></td>
-      <td>${o.overdue?`<span class="pill p-bad">${o.overdue}</span>`:'0'}</td>
-      <td>${o.draft}</td><td>${o.kw}</td><td>${o.cta}</td>
-      <td>${o.impr?fmt(o.impr):'—'}</td><td>${o.clicks?fmt(o.clicks):'—'}</td>
-      <td>${o.ctr?dec(o.ctr):'—'}</td><td>${o.rank?dec(o.rank,1):'—'}</td></tr>`).join(''))}
-  ${gscReady?'':'<p class="muted small">Kolom Impresi/Klik/CTR/Rank kosong — jalankan <code>gsc_pull.py</code> untuk menarik data Search Console.</p>'}`;
-}
-
-function viewKuota(){
-  // hanya bulan berjalan (CUR_KEY), bukan bulan depan
-  const show = MONTHS.filter(m=>monthKey(m)===CUR_KEY);
-  if (!show.length) return '<p class="muted small">Tidak ada data untuk bulan berjalan ('+CUR_KEY+').</p>';
-  const rows = [];
-  for (const c of CLIENTS){
-    for (const m of show){
-      const l = ARTICLES.filter(a=>a.client===c && a.month===m);
-      if (!l.length) continue;
-      const q = l[0].kuota || l.length;   // kuota = angka blok, fallback jumlah baris
-      const done = l.filter(a=>a.live_url).length;
-      rows.push({c, m, q, n:l.length, done, gap:q-done});
-    }
-  }
-  if (!rows.length) return '<p class="muted small">Tidak ada kuota tercatat untuk bulan berjalan.</p>';
-  rows.sort((a,b)=>b.gap-a.gap);
-  return table([{k:'c',t:'Klien'},{k:'m',t:'Bulan'},{k:'q',t:'Kuota'},{k:'done',t:'Posted'},
-                {k:'gap',t:'Kurang'},{k:'st',t:'Status'}],
-    rows.map(o=>`<tr><td><b>${esc(o.c)}</b></td><td class="small">${esc(o.m)}</td><td>${o.q}</td>
-      <td>${o.done}</td><td>${o.gap>0?`<span class="pill p-bad">${o.gap}</span>`:'<span class="pill p-ok">0</span>'}</td>
-      <td>${o.gap<=0?'<span class="pill p-ok">Terpenuhi</span>':
-        o.done?`<span class="pill p-warn">Kurang ${o.gap}</span>`:'<span class="pill p-bad">Belum mulai</span>'}</td></tr>`).join(''));
-}
-
-function viewPenulis(){
-  const names = {};
-  for (const a of ARTICLES){
-    const key = (a.penulis||'').trim().toUpperCase() || '—';
-    const o = names[key] = names[key] || {n:0, posted:0, overdue:0, draft:0};
-    o.n++; const s = status(a);
-    if (s==='Posted') o.posted++; else if (s==='Overdue') o.overdue++; else if (s==='Draft') o.draft++;
-  }
-  const rows = Object.entries(names).filter(([k])=>k!=='—').sort((a,b)=>b[1].n-a[1].n);
-  if (!rows.length) return '<p class="muted small">Kertas kerja tidak mencantumkan penulis.</p>';
-  return table([{k:'c',t:'Penulis'},{k:'n',t:'Artikel'},{k:'posted',t:'Posted'},
-                {k:'draft',t:'Draft'},{k:'overdue',t:'Overdue'}],
-    rows.map(([k,o])=>`<tr><td><b>${esc(k)}</b></td><td>${o.n}</td>
-      <td><span class="pill p-ok">${o.posted}</span></td><td>${o.draft}</td>
-      <td>${o.overdue?`<span class="pill p-bad">${o.overdue}</span>`:'0'}</td></tr>`).join(''));
-}
 
 /* ---------- 2. Pipeline ---------- */
 function viewPipeline(){
@@ -632,7 +526,7 @@ function allQueries(){
       const k = q.q.toLowerCase();
       const o = map[k] = map[k] || {q:q.q, impr:0, clicks:0, posW:0, urls:[]};
       o.impr += q.impr; o.clicks += q.clicks; o.posW += q.pos * q.impr;
-      o.urls.push({url:a.live_url, judul:a.judul, client:a.client, pos:q.pos, impr:q.impr});
+      o.urls.push({url:a.live_url, judul:a.judul, client:a.client, domain:a.domain, pos:q.pos, impr:q.impr});
     }
   }
   for (const o of Object.values(map)){
@@ -641,6 +535,25 @@ function allQueries(){
     o.urls.sort((a,b)=>a.pos-b.pos);
   }
   return map;
+}
+
+function manualPos(o){
+  // cari keyword GSC ini di laporan manual domain artikel teratas.
+  // exact dulu; kalau tidak, substring terpanjang yang cocok (kode angka seperti
+  // "14001" terlalu pendek buat jadi kunci substring — dia nyangkut ke semua judul ISO).
+  const dom = o.urls[0] && o.urls[0].domain;
+  const M = LAPORAN[dom];
+  if (!M) return {pos:null, vol:null, pri:null, landing:''};
+  const k = o.q.toLowerCase().trim();
+  let hit = M[k], best = 0;
+  if (!hit){
+    for (const key in M){
+      if (key.length < 10 || /^\d+$/.test(key)) continue;
+      if ((k.includes(key) || key.includes(k)) && key.length > best){ hit = M[key]; best = key.length; }
+    }
+  }
+  if (!hit) return {pos:null, vol:null, pri:null, landing:''};
+  return {pos:hit[0], vol:hit[1], pri:hit[2], landing:hit[3]||''};
 }
 
 function viewKeyword(){
@@ -661,6 +574,9 @@ function viewKeyword(){
   const peluang = list.filter(o=>o.pos>3 && o.pos<=10 && o.impr>=50).sort((a,b)=>b.impr-a.impr);
   const nolKlik = list.filter(o=>o.impr>=100 && o.clicks===0).sort((a,b)=>b.impr-a.impr);
   const top = list.filter(o=>o.pos<=3).sort((a,b)=>b.impr-a.impr);
+  // keyword yang juga tercatat di laporan manual (pembanding posisi)
+  const matched = list.filter(o=>manualPos(o).pos!=null || manualPos(o).vol!=null)
+                      .sort((a,b)=>b.impr-a.impr);
 
   return `
   <div class="grid kpi">
@@ -693,6 +609,21 @@ function viewKeyword(){
   <div class="card">${table([{k:'q',t:'Keyword'},{k:'impr',t:'Impresi'},{k:'pos',t:'Rank'},{k:'url',t:'Artikel'}],
     nolKlik.slice(0,60).map(o=>`<tr><td><b>${esc(o.q)}</b></td><td>${fmt(o.impr)}</td><td>${dec(o.pos,1)}</td>
       <td class="small"><a href="${esc(o.urls[0].url)}" target="_blank">${esc((o.urls[0].judul||'').slice(0,70))}</a></td></tr>`).join('')||'<tr><td colspan="4" class="muted">Tidak ada.</td></tr>')}</div>
+
+  <h2>📋 Banding GSC vs Laporan Manual — posisi lo dulu vs posisi sekarang</h2>
+  <div class="card"><p class="muted small">Angka manual dari 12 laporan bulanan (kolom Posisi SEO). GSC yang jadi acuan; kolom ini cuma pembanding — kelihatan seberapa jauh posisi berubah sejak dilaporkan ke klien.</p>
+  ${table([{k:'q',t:'Keyword'},{k:'pos',t:'GSC'},{k:'mp',t:'Manual'},{k:'d',t:'Δ'},{k:'vol',t:'Vol'},{k:'pri',t:'Pri'},{k:'url',t:'Artikel / Landing'}],
+    matched.slice(0,80).map(o=>{
+      const mp = manualPos(o);
+      const d = (mp.pos && o.pos) ? +(mp.pos - o.pos).toFixed(1) : null;
+      return `<tr><td><b>${esc(o.q)}</b></td><td>${dec(o.pos,1)}</td>
+      <td class="muted">${mp.pos!=null?mp.pos:'—'}</td>
+      <td>${d==null?'—':`<span class="pill ${d>0?'p-ok':d<0?'p-bad':'p-dim'}">${d>0?'+':''}${dec(d,1)}</span>`}</td>
+      <td class="muted">${mp.vol!=null?fmt(mp.vol):'—'}</td>
+      <td class="muted">${mp.pri!=null?mp.pri:'—'}</td>
+      <td class="small"><a href="${esc(o.urls[0].url)}" target="_blank">${esc((o.urls[0].judul||'').slice(0,60))}</a>
+        ${mp.landing&&mp.landing!==o.urls[0].url?`<div class="muted small">laporan: ${esc(mp.landing.replace(/^https?:\/\/[^/]+/,'').slice(0,60))}</div>`:''}</td></tr>`;
+    }).join('')||'<tr><td colspan="7" class="muted">Belum ada keyword yang cocok dengan laporan manual.</td></tr>')}</div>
 
   <h2>✅ Sudah Top 3 — pertahankan</h2>
   <div class="card">${table([{k:'q',t:'Keyword'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR %'},{k:'pos',t:'Rank'},{k:'url',t:'Artikel'}],
@@ -816,51 +747,6 @@ function viewMeta(){
            {k:'keyword',t:'Keyword'},{k:'issues',t:'Masalah'}], rows)}</div>`;
 }
 
-/* ---------- 4. Strategi ---------- */
-function viewStrategi(){
-  const noKw   = ARTICLES.filter(a=>a.live_url && !a.keyword);
-  const noCta  = ARTICLES.filter(a=>a.live_url && !/^https?:/.test(a.produk||''));
-  const noOut  = ARTICLES.filter(a=>!a.live_url && (a.outline||'').length<40);
-  const plan   = ARTICLES.filter(a=>!a.live_url && a.month && monthKey(a.month)>=CUR_KEY)
-                         .sort((a,b)=>monthKey(a.month).localeCompare(monthKey(b.month))).slice(0,80);
-  const byClient = CLIENTS.map(c=>{
-    const l = ARTICLES.filter(a=>a.client===c);
-    return {c, n:l.length, kw:l.filter(a=>a.keyword).length, cta:l.filter(a=>/^https?:/.test(a.produk||'')).length};
-  }).sort((a,b)=>(a.kw/a.n)-(b.kw/b.n));
-
-  return `
-  <div class="grid kpi">
-    ${kpi('Artikel tanpa keyword', fmt(noKw.length), 'sudah posting, belum ada target keyword')}
-    ${kpi('Artikel tanpa CTA produk', fmt(noCta.length), 'belum link ke halaman produk/layanan')}
-    ${kpi('Artikel tanpa outline', fmt(noOut.length), 'belum posting & belum ada angle')}
-    ${kpi('Rencana ke depan', fmt(plan.length), 'artikel bulan ini & setelahnya')}
-  </div>
-
-  <h2>Prioritas Klien — Kelengkapan SEO</h2>
-  ${table([{k:'c',t:'Klien'},{k:'n',t:'Artikel'},{k:'kw',t:'Keyword'},{k:'kwp',t:'% Keyword'},
-           {k:'cta',t:'CTA'},{k:'ctap',t:'% CTA'}],
-    byClient.map(o=>`<tr><td><b>${esc(o.c)}</b></td><td>${o.n}</td><td>${o.kw}</td>
-      <td><span class="pill ${pct(o.kw,o.n)<30?'p-bad':pct(o.kw,o.n)<70?'p-warn':'p-ok'}">${pct(o.kw,o.n)}%</span></td>
-      <td>${o.cta}</td><td>${pct(o.cta,o.n)}%</td></tr>`).join(''))}
-
-  <div class="two">
-    <div><h2>Artikel Posting Tanpa Keyword</h2>
-      <div class="scroll" style="max-height:340px">${noKw.slice(0,120).map(a=>
-        `<div class="rec"><h3>${esc(a.judul)}</h3>
-         <div class="row muted small">${esc(a.client||'')} • ${esc(a.month||'')} • <a href="${esc(a.live_url)}" target="_blank">live</a></div></div>`).join('')||'<p class="muted">—</p>'}</div></div>
-    <div><h2>Artikel Posting Tanpa CTA Produk</h2>
-      <div class="scroll" style="max-height:340px">${noCta.slice(0,120).map(a=>
-        `<div class="rec"><h3>${esc(a.judul)}</h3>
-         <div class="row muted small">${esc(a.client||'')} • ${esc(a.month||'')} • <a href="${esc(a.live_url)}" target="_blank">live</a></div></div>`).join('')||'<p class="muted">—</p>'}</div></div>
-  </div>
-
-  <h2>Rencana Konten ke Depan</h2>
-  ${table([{k:'month',t:'Bulan'},{k:'client',t:'Klien'},{k:'judul',t:'Judul'},{k:'deadline_posting',t:'Deadline'},
-           {k:'outline',t:'Angle / Outline'}],
-    plan.map(a=>`<tr><td class="small">${esc(a.month)}</td><td class="small">${esc(a.client||'—')}</td>
-      <td>${esc(a.judul)}</td><td class="small">${esc(a.deadline_posting||'—')}</td>
-      <td class="small muted">${esc((a.outline||'').slice(0,180))}</td></tr>`).join(''))}`;
-}
 
 /* ---------- 5. Aksi ---------- */
 function viewAksi(){

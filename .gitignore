@@ -12,3 +12,6 @@ data/gsc_raw.json
 
 # preview lokal (index.html yang sudah di-commit adalah versi live)
 preview.html
+
+# state laporan mingguan (lokal, bukan data dashboard)
+data/weekly_state.json
