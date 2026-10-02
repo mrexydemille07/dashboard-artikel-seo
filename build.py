@@ -45,10 +45,36 @@ def main():
     want = {norm(a["live_url"]) for a in articles if a.get("live_url")}
     gsc = {u: m for u, m in raw.items() if norm(u) in want}
 
+    # Minggu berjalan selalu PARSIAL (GSC lag ~2 hari). Kalau ikut ke sparkline,
+    # semua garis kelihatan anjlok palsu -> buang dari daftar mingguan per URL.
+    import datetime as _dt
+    _y, _cw, _ = _dt.date.today().isocalendar()
+    CUR_WK = "%dW%02d" % (_y, _cw)
+
     # agregat per domain dari SEMUA URL (bukan cuma artikel kertas kerja)
     from urllib.parse import urlsplit
     dom = {}
+    # GSC memisahkan URL dengan #anchor -> gabung ke halaman dasarnya dulu,
+    # kalau tidak satu artikel muncul 5x di daftar 'teratas'
+    merged = {}
     for u, m in raw.items():
+        base = u.split("#")[0]
+        if base in merged:
+            t = merged[base]
+            t["impr"] += m.get("impr", 0); t["clicks"] += m.get("clicks", 0)
+            t["ctr"] = round(100 * t["clicks"] / t["impr"], 2) if t["impr"] else 0
+            wk = {}
+            for x in t.get("weeks", []):
+                wk[x["w"]] = x
+            for x in m.get("weeks", []):
+                e = wk.setdefault(x["w"], dict(x))
+                e["impr"] += x.get("impr", 0); e["clicks"] += x.get("clicks", 0)
+            t["weeks"] = sorted(wk.values(), key=lambda x: x["w"])
+            t["pos"] = max(t.get("pos") or 0, m.get("pos") or 0)
+        else:
+            merged[base] = dict(m)
+    dom = {}
+    for u, m in merged.items():
         h = urlsplit(u).netloc.lower().replace("www.", "")
         d = dom.setdefault(h, {"urls": 0, "impr": 0, "clicks": 0, "posW": 0.0, "posN": 0,
                                "top": [], "weeks": {}})
@@ -59,8 +85,13 @@ def main():
             d["posW"] += m["pos"] * m.get("impr", 0)
             d["posN"] += m.get("impr", 0)
         d["top"].append({"u": u, "impr": m.get("impr", 0), "clicks": m.get("clicks", 0),
-                         "ctr": m.get("ctr", 0), "pos": m.get("pos", 0)})
+                         "ctr": m.get("ctr", 0), "pos": m.get("pos", 0),
+                         # klik per minggu (kronologis, tanpa minggu parsial) -> sparkline
+                         "w": [x.get("clicks", 0) for x in m.get("weeks", [])
+                               if x.get("w") != CUR_WK]})
         for w in m.get("weeks", []):
+            if w.get("w") == CUR_WK:      # minggu parsial -> grafik bisa anjlok palsu
+                continue
             a = d["weeks"].setdefault(w["w"], {"impr": 0, "clicks": 0, "posW": 0.0})
             a["impr"] += w.get("impr", 0)
             a["clicks"] += w.get("clicks", 0)

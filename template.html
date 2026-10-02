@@ -6,35 +6,49 @@
 <title>Dashboard Kinerja Artikel &amp; Strategi Konten</title>
 <style>
 :root{
-  --bg:#0b1120; --panel:#111c33; --panel2:#16233d; --line:#22304d;
-  --txt:#e6edf7; --dim:#8fa3c0; --acc:#38bdf8; --ok:#34d399; --warn:#fbbf24;
-  --bad:#f87171; --pur:#a78bfa;
+  --bg:#0b1220; --panel:#161f2e; --panel2:#1a2433; --line:#2a3648;
+  --txt:#e2e8f0; --dim:#64748b; --acc:#60a5fa; --blue:#3b82f6;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --pur:#a78bfa;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);
   font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 a{color:var(--acc);text-decoration:none}
 a:hover{text-decoration:underline}
-header{padding:18px 22px 0;border-bottom:1px solid var(--line);background:var(--panel)}
-h1{margin:0;font-size:19px;letter-spacing:-.2px}
-.sub{color:var(--dim);font-size:12px;margin:4px 0 14px}
-.tabs{display:flex;gap:4px;flex-wrap:wrap}
-.tab{padding:9px 14px;border:1px solid var(--line);border-bottom:none;
-  border-radius:8px 8px 0 0;background:var(--panel2);color:var(--dim);cursor:pointer;font-size:13px}
-.tab.on{background:var(--bg);color:var(--txt);border-color:var(--acc)}
-main{padding:18px 22px 60px}
-.grid{display:grid;gap:12px}
-.kpi{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-.card .lbl{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
-.card .val{font-size:26px;font-weight:600;margin-top:6px}
-.card .note{color:var(--dim);font-size:11px;margin-top:2px}
-.bar{height:6px;border-radius:3px;background:var(--panel2);margin-top:8px;overflow:hidden}
-.bar>i{display:block;height:100%;background:var(--acc)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;
-  cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0;background:var(--panel)}
+header{padding:20px 26px 0;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{margin:0;font-size:27px;font-weight:800;letter-spacing:-.6px;color:#f1f5f9}
+.sub{color:var(--dim);font-size:12px;margin:5px 0 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.livechip{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.16);
+  color:var(--blue);border:1px solid rgba(59,130,246,.45);border-radius:999px;
+  padding:3px 11px;font-size:11px;font-weight:700;letter-spacing:.4px}
+.livechip i{width:7px;height:7px;border-radius:50%;background:var(--blue);display:block;
+  animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.55)}70%{box-shadow:0 0 0 8px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+.tabs{display:flex;gap:7px;flex-wrap:wrap}
+.tab{padding:8px 15px;border:1px solid var(--line);border-radius:9px;
+  background:transparent;color:var(--dim);cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+.tab:hover{color:var(--txt);border-color:#3a4a63;background:var(--panel2)}
+.tab.on{background:var(--blue);color:#fff;border-color:var(--blue);
+  box-shadow:0 4px 14px rgba(59,130,246,.32)}
+main{padding:24px 26px 70px}
+.grid{display:grid;gap:16px}
+.kpi{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card .lbl{color:#cbd5e1;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0}
+.card .val{font-size:31px;font-weight:800;margin-top:7px;letter-spacing:-1px;color:#f1f5f9;
+  font-variant-numeric:tabular-nums}
+.card .note{color:var(--dim);font-size:11.5px;margin-top:4px;line-height:1.4}
+.card .val.c-ok{color:var(--ok)} .card .val.c-warn{color:var(--warn)}
+.card .val.c-bad{color:var(--bad)} .card .val.c-acc{color:var(--acc)}
+.card .val.c-pur{color:var(--pur)}
+.bar{height:6px;border-radius:3px;background:#0e1626;margin-top:9px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--acc))}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:13px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:#94a3b8;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0;background:var(--panel);
+  border-bottom-color:#334155}
+tbody tr{transition:background .12s}
 tbody tr:hover{background:var(--panel2)}
 .pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;white-space:nowrap}
 .p-ok{background:rgba(52,211,153,.15);color:var(--ok)}
@@ -72,12 +86,29 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 .btn-go{font-size:12px;padding:5px 10px;width:100%}
 .wgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 @media(max-width:1000px){.wgrid{grid-template-columns:1fr}}
-.wcol{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-.wcol h3{margin:0 0 4px;font-size:14px}
-.witem{border-top:1px solid var(--line);padding:8px 0}
+.wcol{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;
+  font-variant-numeric:tabular-nums}
+.wcol h3{margin:0 0 4px;font-size:15px;font-weight:700;letter-spacing:-.2px}
+.wcol.sev{border-color:rgba(248,113,113,.4);
+  background:linear-gradient(180deg,rgba(248,113,113,.06),var(--panel) 90px)}
+.wcol.act{border-color:rgba(59,130,246,.4);
+  background:linear-gradient(180deg,rgba(59,130,246,.06),var(--panel) 90px)}
+.witem{border-top:1px solid var(--line);padding:10px 0;transition:background .12s}
+.witem:hover{background:var(--panel2)}
 .witem:first-of-type{border-top:none}
+.wnum{float:right;font-weight:800;font-size:13px;color:var(--txt)}
+.sbar{height:4px;border-radius:2px;background:#0e1626;margin-top:6px;overflow:hidden}
+.sbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--acc))}
+.wcol.sev .sbar>i{background:linear-gradient(90deg,#ef4444,var(--warn))}
+.mut2{color:#94a3b8}
+.btn-cta{background:var(--blue);color:#fff;border:1px solid var(--blue);border-radius:8px;
+  padding:7px 12px;font-size:12px;font-weight:700;width:100%;margin-top:10px;
+  box-shadow:0 3px 12px rgba(59,130,246,.28)}
+.btn-cta:hover{background:#2563eb;border-color:#2563eb}
 td.mx{background:rgba(248,113,113,.12)}
 td.nm{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.trend{width:100px}
+.mut2{color:#94a3b8}
 .wt{font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ok{color:var(--ok)}
 tr.meta-saran td{background:var(--panel2);border-bottom:1px solid var(--line);padding-top:4px;padding-bottom:8px}
@@ -89,7 +120,7 @@ tr.meta-saran td{white-space:normal}
 <body>
 <header>
   <h1>Dashboard Kinerja Artikel &amp; Strategi Konten</h1>
-  <div class="sub" id="stamp">memuat…</div>
+  <div class="sub"><span class="livechip"><i></i>LIVE</span><span id="stamp">memuat…</span></div>
   <div class="tabs" id="tabs"></div>
 </header>
 <main id="view"></main>
@@ -168,10 +199,23 @@ function agg(list){
 }
 
 /* ===== render helpers ===== */
-function kpi(lbl,val,note,barPct){
-  return `<div class="card"><div class="lbl">${lbl}</div><div class="val">${val}</div>
+// c: warna status -> kpi tanpa warna semua sama saja, mata nggak bisa skim
+function kpi(lbl,val,note,barPct,c){
+  return `<div class="card${c==='c-bad'?' hi':c==='c-ok'?' good':''}"><div class="lbl">${lbl}</div>
+    <div class="val${c?' '+c:''}">${val}</div>
     ${note?`<div class="note">${note}</div>`:''}
     ${barPct!=null?`<div class="bar"><i style="width:${barPct}%"></i></div>`:''}</div>`;
+}
+// sparkline inline 1 baris — biar tabel terasa bergerak, bukan angka statis
+function spark(vals,color){
+  const max = vals ? Math.max(...vals) : 0;
+  if(!vals || vals.length<2 || !max) return '<span class="muted small">nol klik</span>';
+  const min=Math.min(...vals), sp=max-min||1;
+  const pts=vals.map((v,i)=>`${(i*(100/(vals.length-1))).toFixed(1)},${(28-24*(v-min)/sp).toFixed(1)}`).join(' ');
+  const up=vals[vals.length-1]>=vals[0];
+  return `<svg viewBox="0 0 100 30" width="86" height="26" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="${color|| (up?'#34d399':'#f87171')}"
+      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
 }
 function bars(data,{w=560,h=150,color='var(--acc)'}={}){
   const max = Math.max(1,...data.map(d=>d.v));
@@ -271,16 +315,21 @@ function viewWork(){
   const dom = F.site;
   const fi = dom ? ideas.filter(x=>x.domain===dom) : ideas;
   const fr = dom ? recos.filter(r=>r.a.domain===dom) : recos;
-  const col = (n,title,sub,body) => `<div class="wcol"><h3>${n} ${title}</h3><p class="muted small">${sub}</p>${body}</div>`;
+  const col = (n,title,sub,body,cls) => `<div class="wcol${cls?' '+cls:''}"><h3>${n} ${title}</h3><p class="mut2 small">${sub}</p>${body}</div>`;
+  const maxScore = Math.max(1, ...(fi.map(x=>x.score).concat(fr.map(r=>r.score))));
   const ideaRows = fi.slice(0,15).map(x=>`<div class="witem">
+      <span class="wnum">${x.score}</span>
       <div class="wt">${esc(x.q)}</div>
-      <div class="muted small">${esc(x.domain)} • ${fmt(x.impr)} impresi/bln • rank ${dec(x.pos,1)}</div>
-      <div class="muted small">skor ${x.score}</div></div>`).join('') || '<p class="muted small">Tidak ada kandidat.</p>';
-  const ideaDl = fi.length ? `<button id="dl-ideas" style="margin-top:8px;width:100%">⬇ Unduh ${fmt(fi.length)} ide (CSV)</button>` : '';
+      <div class="mut2 small">${esc(x.domain)} • ${fmt(x.impr)} impr/bln • rank ${dec(x.pos,1)}</div>
+      <div class="sbar"><i style="width:${Math.round(100*x.score/maxScore)}%"></i></div></div>`).join('')
+      || '<p class="mut2 small">Tidak ada kandidat.</p>';
+  const ideaDl = fi.length ? `<button id="dl-ideas" class="btn-cta">⬇ Unduh ${fmt(fi.length)} ide konten (CSV)</button>` : '';
   const recoRows = fr.slice(0,15).map(r=>`<div class="witem">
+      <span class="wnum">${r.score}</span>
       <div class="wt" title="${esc(r.a.judul||r.a.live_url||'')}">${esc((r.a.judul||r.a.live_url||'(tanpa judul)').slice(0,64))}</div>
-      <div class="muted small">${esc(r.a.client||'')} • ${r.issues.map(i=>i.t).join(', ')}</div>
-      <div class="muted small">skor ${r.score}</div></div>`).join('') || '<p class="muted small">Tidak ada.</p>';
+      <div class="mut2 small">${esc(r.a.client||'')} • ${r.issues.map(i=>i.t).join(', ')}</div>
+      <div class="sbar"><i style="width:${Math.round(100*r.score/maxScore)}%"></i></div></div>`).join('')
+      || '<p class="mut2 small">Tidak ada.</p>';
   // domain pertama yang PUNYA laporan manual (SSI/SSP formatnya beda, tidak ada di LAPORAN)
   const repDom = dom || Object.keys(LAPORAN)[0] || '';
   const rep = repDom ? reportRows(repDom) : [];
@@ -294,19 +343,27 @@ function viewWork(){
       <div class="muted small">${esc(g.domain)} • ${g.n_kw} keyword dilaporkan${g.pos_manual!=null?' • posisi di laporan klien: '+g.pos_manual:''}</div>
       <div class="muted small">${esc(g.keyword||'')}</div></div>`).join('')
       || '<p class="muted small">Tidak ada temuan.</p>';
-  const gapDl = gaps.length ? `<button id="dl-gap" style="margin-top:8px;width:100%">⬇ Unduh ${fmt(gaps.length)} halaman (CSV)</button>` : '';
+  const gapDl = gaps.length ? `<button id="dl-gap" class="btn-cta">⬇ Unduh ${fmt(gaps.length)} halaman bermasalah (CSV)</button>` : '';
+  const tImpr = PORTFOLIO.reduce((s,x)=>s+x.impr,0), tClk = PORTFOLIO.reduce((s,x)=>s+x.clicks,0);
   return `
+  <div class="grid kpi" style="margin-bottom:18px">
+    ${kpi('Impresi 90 hari', fmt(tImpr), fmt(PORTFOLIO.length)+' brand • semua URL', null, 'c-acc')}
+    ${kpi('Klik', fmt(tClk), 'CTR '+dec(tImpr?100*tClk/tImpr:0,2)+'%', null, tClk?'c-ok':null)}
+    ${kpi('Ide konten', fmt(fi.length), 'belum ada artikelnya', null, 'c-warn')}
+    ${kpi('Perlu diperbaiki', fmt(fr.length), 'artikel tayang yang bocor', null, fr.length?'c-bad':null)}
+    ${kpi('Cek laporan', fmt(gaps.length), 'dilaporkan tapi tak muncul', null, gaps.length?'c-bad':null)}
+  </div>
   <div class="ctl">
     <select id="f-site"><option value="">Semua website</option>${
       PORTFOLIO.map(x=>`<option value="${esc(x.domain)}"${x.domain===dom?' selected':''}>${esc(x.nama)}</option>`).join('')}</select>
     <span class="muted small">Antrean kerja — urut dampak, bukan urut tanggal</span>
   </div>
   <div class="wgrid">
-    ${col('①','MAU NULIS APA', fmt(fi.length)+' query besar yang halaman rankingnya BUKAN artikel dari kertas kerja lo — belum ada artikel yang menyasar', ideaRows + ideaDl)}
-    ${col('②','PERBAIKI APA', fmt(fr.length)+' artikel tayang yang bocor', recoRows)}
-    ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor — '+esc(repDom||'')+' • posisi manual dari SERP/Ubersuggest/Semrush, beda metode dengan GSC',
-       repRows + (repDom && rep.length?`<button id="dl-report" style="margin-top:8px;width:100%">⬇ Unduh laporan ${esc(repDom)}</button>`:''))}
-    ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows + gapDl)}
+    ${col('①','MAU NULIS APA', fmt(fi.length)+' query besar yang halaman rankingnya BUKAN artikel dari kertas kerja lo — belum ada artikel yang menyasar', ideaRows + ideaDl, 'act')}
+    ${col('②','PERBAIKI APA', fmt(fr.length)+' artikel tayang yang bocor — CTR rendah, tren turun, nol impresi', recoRows, 'sev')}
+    ${col('③','REPORT', fmt(rep.length)+' keyword siap lapor — '+esc(repDom||'')+' • posisi manual: SERP/Ubersuggest/Semrush, beda metode dari GSC',
+       repRows + (repDom && rep.length?`<button id="dl-report" class="btn-cta">⬇ Unduh laporan ${esc(repDom)} (CSV)</button>`:''))}
+    ${col('④','CEK LAPORAN', fmt(gaps.length)+' halaman dilaporkan ke klien tapi TIDAK muncul di GSC 90 hari', gapRows + gapDl, 'sev')}
   </div>
   <h2>Produksi per Brand per Bulan <span class="muted small">(kotak kosong = bulan itu tidak ada artikel — kelihatan brand yang bolong)</span></h2>
   <div class="card">${prodMatrix()}</div>`;
@@ -378,6 +435,7 @@ function viewSite(){
   const rows = top.map(t=>`<tr>
     <td class="small">${esc(t.u.replace(/^https?:\/\/[^/]+/,''))}</td>
     <td>${fmt(t.impr)}</td><td>${fmt(t.clicks)}</td><td>${dec(t.ctr,2)}%</td><td>${dec(t.pos,1)}</td>
+    <td class="trend">${spark(t.w)}</td>
     <td>${t.impr>=100&&t.ctr<1.5?'<span class="pill p-warn">CTR rendah</span>':''}
         ${t.pos>10?'<span class="pill p-bad">di luar H1</span>':''}</td></tr>`).join('');
   return `
@@ -387,13 +445,13 @@ function viewSite(){
     <span class="muted small">${esc(dom)} • ${fmt(dp.urls)} URL di GSC</span>
   </div>
   <div class="grid kpi">
-    ${kpi('Impresi', fmt(dp.impr), '90 hari')}
-    ${kpi('Klik', fmt(dp.clicks), 'CTR '+dec(dp.ctr,2)+'%')}
-    ${kpi('Rank rata-rata', dec(dp.pos,1), 'semua URL')}
+    ${kpi('Impresi', fmt(dp.impr), '90 hari, semua URL situs', null, 'c-acc')}
+    ${kpi('Klik', fmt(dp.clicks), 'CTR '+dec(dp.ctr,2)+'%', null, dp.ctr>=1.5?'c-ok':'c-warn')}
+    ${kpi('Rank rata-rata', dec(dp.pos,1), 'semua URL • makin kecil makin baik', null, dp.pos<=5?'c-ok':dp.pos<=10?'c-warn':'c-bad')}
     ${kpi('Artikel kertas kerja', fmt(o.posted)+' / '+fmt(o.n), 'posted / total')}
-    ${kpi('Top 3 / Halaman 1', fmt(o.top3)+' / '+fmt(o.page1), 'dari artikel yang punya metrik')}
+    ${kpi('Top 3 / Halaman 1', fmt(o.top3)+' / '+fmt(o.page1), 'artikel kertas kerja yang punya metrik', null, o.top3?'c-ok':null)}
   </div>
-  <h2>Tren Mingguan</h2>
+  <h2>Tren Mingguan <span class="muted small">(minggu berjalan di-skip — masih parsial)</span></h2>
   <div class="card">${wk.length?bars(wk.map(w=>({l:w.w.slice(4),v:w.impr})),{h:170}):'<p class="muted">Belum ada data mingguan.</p>'}</div>
 
   <h2>Produksi Artikel per Bulan <span class="muted small">(kertas kerja — kelihatan bulan yang bolong)</span></h2>
@@ -403,7 +461,7 @@ function viewSite(){
   <div class="card">${agePerf(arts)}</div>
 
   <h2>Artikel Teratas di Website Ini <span class="muted small">(semua URL, bukan cuma kertas kerja)</span></h2>
-  <div class="card">${table([{k:'u',t:'URL'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR'},{k:'pos',t:'Rank'},{k:'x',t:'Catatan'}], rows)}</div>`;
+  <div class="card">${table([{k:'u',t:'URL'},{k:'impr',t:'Impresi'},{k:'clicks',t:'Klik'},{k:'ctr',t:'CTR'},{k:'pos',t:'Rank'},{k:'w',t:'Tren 14 minggu'},{k:'x',t:'Catatan'}], rows)}</div>`;
 }
 // matriks brand x bulan: sel = jumlah artikel posted; kosong = bolong
 function prodMatrix(){
@@ -515,10 +573,10 @@ function viewReport(){
   </div>
   <div class="grid kpi">
     ${kpi('Keyword dilacak', fmt(rows.length), esc(dom))}
-    ${kpi('Top 3 (GSC)', fmt(top3), 'posisi nyata Google')}
-    ${kpi('Halaman 1 (GSC)', fmt(h1), 'posisi 4-10 (Top 3 dihitung terpisah)')}
-    ${kpi('Melorot vs laporan', fmt(worse), 'GSC ≥4 posisi lebih buruk')}
-    ${kpi('Tak muncul di GSC', fmt(gone), 'halaman tidak terdeteksi 90 hari')}
+    ${kpi('Top 3 (GSC)', fmt(top3), 'posisi nyata Google', null, top3?'c-ok':null)}
+    ${kpi('Halaman 1 (GSC)', fmt(h1), 'posisi 4-10 (Top 3 dihitung terpisah)', null, 'c-ok')}
+    ${kpi('Melorot vs laporan', fmt(worse), 'GSC ≥4 posisi lebih buruk dari angka laporan', null, worse?'c-bad':null)}
+    ${kpi('Tak muncul di GSC', fmt(gone), 'halaman tidak terdeteksi 90 hari', null, gone?'c-bad':null)}
   </div>
   <h2>Laporan ${esc(dom)} <span class="muted small">• ${fmt(impr)} impresi • ${fmt(clk)} klik • 90 hari</span></h2>
   <div class="card"><p class="muted small">Kolom Volume &amp; Posisi manual = angka yang lo laporkan (SERP check/Ubersuggest/Semrush). Kolom GSC = data nyata Google. Beda metode, jadi selisih itu wajar — tapi yang kirim ke klien harus konsisten satu sumber.</p>
@@ -619,10 +677,10 @@ function viewRekomendasi(){
   </div>
   <div class="grid kpi">
     ${kpi('Butuh tindakan', fmt(all.length), 'dari '+fmt(ARTICLES.filter(a=>a.live_url).length)+' artikel tayang')}
-    ${kpi('CTR rendah', fmt(byType['CTR rendah']||0), 'impresi ada, klik tidak')}
-    ${kpi('Tren menurun', fmt(byType['Tren menurun']||0), 'klik turun ≥30% dalam 4 minggu')}
+    ${kpi('CTR rendah', fmt(byType['CTR rendah']||0), 'impresi ada, klik tidak', null, 'c-warn')}
+    ${kpi('Tren menurun', fmt(byType['Tren menurun']||0), 'klik turun ≥30% dalam 4 minggu', null, 'c-bad')}
     ${kpi('Peluang Top 3', fmt(byType['Peluang Top 3']||0), 'rank 4-10')}
-    ${kpi('Tanpa impresi', fmt(byType['Tidak ada impresi']||0), 'tidak muncul di GSC')}
+    ${kpi('Tanpa impresi', fmt(byType['Tidak ada impresi']||0), 'tidak muncul di GSC', null, 'c-bad')}
   </div>
   <h2>🎯 Rekomendasi Tindakan <span class="muted small">(urut skor dampak)</span></h2>
   <div class="card"><p class="muted small">Skor = perkiraan besarnya klik yang bisa diselamatkan. Arahkan kursor ke label untuk alasan lengkap.</p>
@@ -797,10 +855,10 @@ function viewKeyword(){
   return `
   <div class="grid kpi">
     ${kpi('Total Keyword', fmt(list.length), 'yang mendatangkan impresi')}
-    ${kpi('Kanibalisasi', fmt(kanib.length), 'keyword direbut >1 artikel')}
-    ${kpi('Peluang Top 3', fmt(peluang.length), 'rank 4-10, impresi ≥50')}
+    ${kpi('Kanibalisasi', fmt(kanib.length), 'keyword direbut >1 artikel', null, 'c-bad')}
+    ${kpi('Peluang Top 3', fmt(peluang.length), 'rank 4-10, impresi ≥50', null, 'c-warn')}
     ${kpi('Impresi Nol Klik', fmt(nolKlik.length), '≥100 impresi, 0 klik')}
-    ${kpi('Sudah Top 3', fmt(top.length), 'keyword yang sudah menang')}
+    ${kpi('Sudah Top 3', fmt(top.length), 'keyword yang sudah menang', null, 'c-ok')}
   </div>
 
   <h2>⚠️ Kanibalisasi Keyword — satu keyword, banyak artikel</h2>
