@@ -13,6 +13,20 @@ def domain_of(url):
     return m.group(1).lower() if m else (url or "").split("/")[0].lower()
 
 
+def dns_ok(dom):
+    try:
+        socket.getaddrinfo(dom, None)
+        return True
+    except Exception:
+        pass
+    try:   # fallback DoH: getaddrinfo lokal bisa gagal padahal domain hidup
+        j = json.load(urllib.request.urlopen(
+            "https://dns.google/resolve?name=%s&type=A" % dom, timeout=10))
+        return bool(j.get("Answer"))
+    except Exception:
+        return False
+
+
 def head(url):
     try:
         r = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=15)
@@ -27,12 +41,11 @@ def main():
     raw = json.load(open(os.path.join(DATA, "sites.json"), encoding="utf-8"))
     # sites.json boleh menyimpan link admin (bahan kerja lokal); di sini kita turunkan
     # ke domain saja. Jangan pernah menulis 'wp' ke file yang ikut ke repo.
-    import re as _re
-    def _dom(u):
-        m = _re.search(r"https?://([^/\s]+)", u or "")
-        return m.group(1).lower().replace("www.", "") if m else ""
-    sites = [{"no": s["no"], "nama": s["nama"], "wp": "https://" + _dom(s.get("wp")) + "/",
-              "laporan": s.get("laporan")} for s in raw]
+    # sites.json sudah berisi domain bersih (tanpa link admin) — pakai langsung.
+    sites = [{"no": s["no"], "nama": s["nama"],
+              "wp": "https://" + (s.get("domain") or "").replace("www.", "") + "/",
+              "laporan": s.get("laporan")}
+             for s in raw if s.get("domain")]
     gsc = json.load(open(os.path.join(DATA, "gsc.json"), encoding="utf-8"))
     arts = json.load(open(os.path.join(DATA, "articles.json"), encoding="utf-8"))
 
@@ -58,11 +71,7 @@ def main():
         # 'wp' (link admin) sengaja tidak disimpan: file ini ikut ke repo publik
         row = {"no": s["no"], "nama": s["nama"], "domain": dom,
                "laporan": bool(s["laporan"]), "artikel": n_art.get(dom, 0)}
-        try:
-            socket.getaddrinfo(dom, None)
-            row["dns"] = True
-        except Exception:
-            row["dns"] = False
+        row["dns"] = dns_ok(dom)
         row["http"] = row["sitemap"] = None
         if row["dns"]:
             st, final = head("https://" + dom + "/")

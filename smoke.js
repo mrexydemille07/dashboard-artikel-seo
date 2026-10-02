@@ -15,12 +15,17 @@ global.document = {
   querySelectorAll: () => [],
   querySelector: () => null,
 };
-global.location = { protocol: 'file:' };
+global.location = { protocol: 'file:', hash: '' };
+global.history = { replaceState(){} };
 global.fetch = () => Promise.reject(new Error('no fetch'));
 
 const wrapped = code + `
 ;module.exports = { ARTICLES, BRANDS, CLIENTS, MONTHS, agg, status, metrics,
-  viewWork, viewSite, viewKeyword, viewReport, viewAksi, filtered, F, LAPORAN, IDEAS, LANDING_GAP };`;
+  viewWork, viewSite, viewArticles, viewKeyword, viewReport, viewAksi, filtered, F, POSTS,
+  articlesRows, LAPORAN, IDEAS, LANDING_GAP,
+  tabsFor, syncModeUI, buildReport, globalWeeks, render,
+  tabsHtml: ()=>document.getElementById('tabs').innerHTML,
+  setMode: (m)=>setMode(m), get mode(){return mode;} };`;
 
 const api = eval(wrapped);
 
@@ -32,6 +37,7 @@ const check = (name, fn) => {
 // 4 tab yang benar-benar dipakai (sisanya sudah dibuang dari TABS)
 check('work', api.viewWork);
 check('site', api.viewSite);
+check('articles', api.viewArticles);
 check('keyword', api.viewKeyword);
 check('report', api.viewReport);
 check('aksi', api.viewAksi);
@@ -41,6 +47,35 @@ check('ideas', () => { const n = api.IDEAS.length;
   if (!n) throw new Error('IDEAS kosong'); return 'x'.repeat(n); });
 check('gap', () => { const n = api.LANDING_GAP.length;
   if (!n) throw new Error('LANDING_GAP kosong'); return 'x'.repeat(n); });
+
+// dual-mode + Tarik Report
+check('tabs(mode2)', () => 'x'.repeat(api.tabsFor().length));
+api.setMode('1');
+if (api.tabsFor().length !== 2) throw new Error('Mode 1 harus 2 tab, dapat ' + api.tabsFor().length);
+if (api.mode !== '1') throw new Error('mode tidak berubah');
+api.setMode('2');
+if (api.tabsFor().length !== 6) throw new Error('Mode 2 harus 6 tab');
+check('weeks', () => 'x'.repeat(api.globalWeeks().length));
+check('report-m2', () => api.buildReport());
+api.setMode('1');
+const r1 = api.buildReport();
+if (r1.includes('Butuh Tindakan')) throw new Error('Mode 1 masih menyisip blok operasional');
+check('report-m1', () => r1);
+api.setMode('2');
+
+// render() di kedua mode: pastikan tab + view benar-benar dirender
+api.setMode('1'); api.render();
+const t1 = api.tabsHtml();
+if (!t1.includes('Performa Website') || !t1.includes('Laporan Klien'))
+  throw new Error('Mode 1: tab ringkasan tidak render: ' + JSON.stringify(t1).slice(0,200));
+if (t1.includes('data-tab="aksi"') || t1.includes('data-tab="keyword"') || t1.includes('data-tab="articles"'))
+  throw new Error('Mode 1: tab operasional masih tampil: ' + t1);
+api.setMode('2'); api.render();
+const t2 = api.tabsHtml();
+['work','site','articles','keyword','report','aksi'].forEach(k => {
+  if (!t2.includes(`data-tab="${k}"`)) throw new Error('Mode 2: tab hilang ' + k);
+});
+console.log('render mode1 ->', t1.length, 'bytes; mode2 ->', t2.length, 'bytes');
 
 console.log('\narticles:', api.ARTICLES.length, '| clients:', api.CLIENTS.length, '| months:', api.MONTHS.length);
 const st = {};

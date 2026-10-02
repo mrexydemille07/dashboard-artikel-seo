@@ -127,6 +127,10 @@ def main():
         def pub(u):
             return u if is_url(u) and "docs.google.com" not in u else ""
         live_url = pub(live) or (pub(draft) if not is_url(draft, "docs.google.com") else "")
+        # kolom Keterangan kadang nyimpen URL live (119 baris) — pakai sbg fallback;
+        # validasi domain klien di bawah tetap berlaku, jadi URL nyasar tetap dibuang.
+        if not live_url:
+            live_url = pub(get("keterangan"))
         # URL live harus cocok dengan domain klien; kalau nyasar (salin baris), buang.
         expected = CLIENT_DOMAIN.get(client or "")
         if live_url and expected and expected not in domain(live_url):

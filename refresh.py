@@ -32,7 +32,11 @@ def main():
     run([sys.executable, "meta_audit.py"])
     run([sys.executable, "meta_fix.py"])
 
-    # 4) build + test render
+    # 4) semua URL artikel per brand dari sitemap -> data/posts.json
+    # (gsc_raw.json sudah ada dari langkah 2; dipakai utk fallback + join metrik)
+    run([sys.executable, "sitemap_posts.py"])
+
+    # 5) build + test render
     run([sys.executable, "build.py"])
     run(["node", "smoke.js", "index.html"])
 

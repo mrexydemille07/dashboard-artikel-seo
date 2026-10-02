@@ -108,6 +108,46 @@ def main():
                       for k, v in sorted(d["weeks"].items())]
     domain_perf = dom
 
+    # SEMUA artikel sitemap per domain (bukan cuma kertas kerja) -> data/posts.json,
+    # di-fetch runtime lewat live() karena terlalu besar untuk ditanam di HTML.
+    # Bentuk: {"weeks": [label...], "domains": {domain: [[path,impr,klik,pos,
+    #   [[impr,klik,pos] per minggu searah weeks]] ...]}}
+    sitemap_posts = load("sitemap_posts.json", {})
+    raw_n = {norm(u): m for u, m in raw.items()}
+    wk_labels = set()
+    posts = {}
+    for dm, urls in sitemap_posts.items():
+        rows = []
+        for u in urls:
+            mm = raw_n.get(norm(u))
+            if not mm:
+                continue
+            byw = {w.get("w"): w for w in mm.get("weeks", []) if w.get("w") != CUR_WK}
+            wk_labels.update(byw)
+            rows.append([urlsplit(u).path.strip("/"), mm.get("impr", 0), mm.get("clicks", 0),
+                         round(mm.get("pos") or 0, 1), byw])
+        rows.sort(key=lambda r: -r[1])
+        if rows:
+            posts[dm] = rows
+    weeks_all = sorted(wk_labels)
+    slim = {}
+    for dm, rows in posts.items():
+        out = []
+        for path, impr, clicks, pos, byw in rows:
+            series = []
+            for w in weeks_all:
+                v = byw.get(w)
+                series.append([v.get("impr", 0), v.get("clicks", 0),
+                               round(v.get("pos") or 0, 1)] if v else [0, 0, 0])
+            out.append([path, impr, clicks, pos, series])
+        slim[dm] = out
+    json.dump({"weeks": weeks_all, "domains": slim},
+              open(os.path.join(DATA, "posts.json"), "w", encoding="utf-8"),
+              ensure_ascii=False, separators=(",", ":"))
+    print("posts.json: %d domain, %d URL artikel, %d minggu" % (
+        len(slim), sum(len(v) for v in slim.values()), len(weeks_all)))
+
+
     # Portfolio: satu baris per DOMAIN yang benar-benar dikerjakan.
     st_by_dom = {s["domain"].replace("www.", ""): s for s in sites_status}
     nama_by_dom = {}
@@ -132,6 +172,8 @@ def main():
             # baris sheet, karena 4 domain Proxsis tidak terdaftar di sheet portofolio)
             "gsc_properti": bool(dp.get("urls")) or st.get("gsc"),
             "laporan": st.get("laporan"),
+            "sm": len(sitemap_posts.get(h, [])),
+            "sm_ind": len(posts.get(h, [])),
             "impr": dp.get("impr", 0), "clicks": dp.get("clicks", 0),
             "ctr": dp.get("ctr", 0), "pos": dp.get("pos", 0), "urls_gsc": dp.get("urls", 0),
             # link REDACTED sengaja TIDAK ikut: repo ini publik, URL admin tidak perlu tayang
@@ -251,6 +293,7 @@ def main():
                       ("/*__IDEAS__*/[]", js(ideas)),
                       ("/*__LANDING_GAP__*/[]", js(landing_gap)),
                       ("/*__LAPORAN__*/{}", js(laporan_map)),
+                       ("/*__POSTS__*/{}", js({"weeks": weeks_all, "domains": slim})),
                        ("/*__META__*/{}", js(meta))):
         assert token in tpl, "token hilang dari template: " + token
         tpl = tpl.replace(token, val)

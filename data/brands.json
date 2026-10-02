@@ -2,31 +2,36 @@
  {
   "domain": "synergysolusi.com",
   "client": "SSI",
-  "articles": 81
+  "articles": 90
  },
  {
   "domain": "it.proxsisgroup.com",
   "client": "Proxsis IT",
-  "articles": 80
+  "articles": 90
  },
  {
   "domain": "itgid.org",
   "client": "ITGID",
-  "articles": 80
+  "articles": 90
  },
  {
   "domain": "biztechacademy.id",
   "client": "Biztech Academy",
-  "articles": 80
+  "articles": 90
  },
  {
   "domain": "hr.proxsisgroup.com",
   "client": "Proxsis HR",
-  "articles": 70
+  "articles": 80
  },
  {
   "domain": "strategy.proxsisgroup.com",
   "client": "Strategy.Proxsis",
+  "articles": 70
+ },
+ {
+  "domain": "indonesiasafetycenter.org",
+  "client": "ISC",
   "articles": 60
  },
  {
@@ -35,14 +40,9 @@
   "articles": 60
  },
  {
-  "domain": "indonesiasafetycenter.org",
-  "client": "ISC",
-  "articles": 52
- },
- {
   "domain": "petrotrainingasia.com",
   "client": "Petrotraining",
-  "articles": 50
+  "articles": 58
  },
  {
   "domain": "talkactive.co.id",
@@ -52,27 +52,27 @@
  {
   "domain": "fs-institute.org",
   "client": "FSI",
-  "articles": 40
+  "articles": 45
  },
  {
   "domain": "isoindonesiacenter.com",
   "client": "Isocenter",
-  "articles": 40
+  "articles": 45
  },
  {
   "domain": "icicert.com",
   "client": "Icicert",
-  "articles": 40
+  "articles": 45
  },
  {
   "domain": "grc-indonesia.com",
   "client": "GRC",
-  "articles": 34
+  "articles": 39
  },
  {
   "domain": "ipqi.org",
   "client": "IPQI",
-  "articles": 34
+  "articles": 39
  },
  {
   "domain": "digital.proxsisgroup.com",
@@ -82,7 +82,7 @@
  {
   "domain": "infrasec.proxsisgroup.com",
   "client": "Infra Sec",
-  "articles": 5
+  "articles": 10
  },
  {
   "domain": "infra.proxsisgroup.com",
