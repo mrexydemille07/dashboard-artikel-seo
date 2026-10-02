@@ -108,6 +108,9 @@ pre{background:#0a1526;border:1px solid var(--line);border-radius:7px;padding:10
 td.mx{background:rgba(248,113,113,.12)}
 td.nm{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 td.trend{width:100px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.c-ok{color:var(--ok);font-weight:700} td.c-warn{color:var(--warn);font-weight:700}
+td.c-bad{color:var(--bad);font-weight:700}
 .mut2{color:#94a3b8}
 .wt{font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ok{color:var(--ok)}
@@ -448,7 +451,7 @@ function viewSite(){
     ${kpi('Impresi', fmt(dp.impr), '90 hari, semua URL situs', null, 'c-acc')}
     ${kpi('Klik', fmt(dp.clicks), 'CTR '+dec(dp.ctr,2)+'%', null, dp.ctr>=1.5?'c-ok':'c-warn')}
     ${kpi('Rank rata-rata', dec(dp.pos,1), 'semua URL • makin kecil makin baik', null, dp.pos<=5?'c-ok':dp.pos<=10?'c-warn':'c-bad')}
-    ${kpi('Artikel kertas kerja', fmt(o.posted)+' / '+fmt(o.n), 'posted / total')}
+    ${kpi('Artikel kertas kerja', fmt(o.posted)+' / '+fmt(o.n), 'posted / total', null, o.n&&o.posted===o.n?'c-ok':'c-warn')}
     ${kpi('Top 3 / Halaman 1', fmt(o.top3)+' / '+fmt(o.page1), 'artikel kertas kerja yang punya metrik', null, o.top3?'c-ok':null)}
   </div>
   <h2>Tren Mingguan <span class="muted small">(minggu berjalan di-skip — masih parsial)</span></h2>
@@ -552,16 +555,16 @@ function viewReport(){
     const d = (r.posGsc!=='' && r.posManual!=='') ? r.posGsc - r.posManual : null;
     const st = r.posGsc==='' ? '<span class="pill p-bad">tak muncul di GSC</span>'
       : d===null ? '<span class="pill p-dim">tanpa angka manual</span>'
-      : d>=4 ? `<span class="pill p-warn">melorot ${dec(d,1)}</span>`
+      : d>=4 ? `<span class="pill p-bad">melorot ${dec(d,1)}</span>`
       : d<=-4 ? `<span class="pill p-ok">membaik ${dec(-d,1)}</span>`
       : '<span class="pill p-dim">stabil</span>';
     return `<tr>
       <td><b>${esc(r.produk||'—')}</b><div class="muted small">${esc((r.landing||'').replace(/^https?:\/\/[^/]+/,''))}</div></td>
       <td>${esc(r.keyword)}</td>
-      <td>${r.vol||'—'}</td>
-      <td>${r.posManual===''?'—':r.posManual}</td>
-      <td>${r.posGsc===''?'—':dec(r.posGsc,1)}</td>
-      <td>${fmt(r.impr||0)}</td><td>${fmt(r.clicks||0)}</td>
+      <td class="num">${r.vol||'—'}</td>
+      <td class="num">${r.posManual===''?'—':r.posManual}</td>
+      <td class="num ${r.posGsc===''?'muted':r.posGsc<=3?'c-ok':r.posGsc<=10?'c-warn':'c-bad'}">${r.posGsc===''?'—':dec(r.posGsc,1)}</td>
+      <td class="num">${fmt(r.impr||0)}</td><td class="num">${fmt(r.clicks||0)}</td>
       <td>${st}</td></tr>`;
   }).join('');
   return `
@@ -572,8 +575,8 @@ function viewReport(){
     <button id="dl-report-all">⬇ Unduh SEMUA brand (1 file)</button>
   </div>
   <div class="grid kpi">
-    ${kpi('Keyword dilacak', fmt(rows.length), esc(dom))}
-    ${kpi('Top 3 (GSC)', fmt(top3), 'posisi nyata Google', null, top3?'c-ok':null)}
+    ${kpi('Keyword dilacak', fmt(rows.length), esc(dom), null, 'c-acc')}
+    ${kpi('Top 3 (GSC)', fmt(top3), 'posisi nyata Google', null, top3?'c-ok':'c-bad')}
     ${kpi('Halaman 1 (GSC)', fmt(h1), 'posisi 4-10 (Top 3 dihitung terpisah)', null, 'c-ok')}
     ${kpi('Melorot vs laporan', fmt(worse), 'GSC ≥4 posisi lebih buruk dari angka laporan', null, worse?'c-bad':null)}
     ${kpi('Tak muncul di GSC', fmt(gone), 'halaman tidak terdeteksi 90 hari', null, gone?'c-bad':null)}
