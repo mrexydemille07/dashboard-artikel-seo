@@ -597,8 +597,19 @@ function ageDays(a){
   const t = Date.parse(d);
   return isNaN(t) ? null : Math.round((Date.now()-t)/86400000);
 }
+// ISO week yang sedang berjalan -> selalu parsial (GSC lag), buang dari hitungan tren
+// ISO week versi Kamis minggu ini (rumus cek: 2026-10-02 -> 2026W40, sama dg Python)
+function curWeek(d){ const x=new Date(d||Date.now());
+  const t=new Date(Date.UTC(x.getFullYear(),x.getMonth(),x.getDate()));
+  t.setUTCDate(t.getUTCDate()+4-((t.getUTCDay()||7)));   // Kamis minggu ini
+  const y=t.getUTCFullYear();
+  const day=(t-Date.UTC(y,0,1))/864e5+1;
+  const jan1=new Date(Date.UTC(y,0,1)); const dow=jan1.getUTCDay()||7;
+  return y+'W'+String(Math.floor((day-1+dow)/7)+1).padStart(2,'0'); }
+const CUR_WK = curWeek();
+function fullWeeks(w){ return (w||[]).filter(x=>x.w!==CUR_WK); }
 function decayOf(m){
-  const w = (m && m.weeks) || [];
+  const w = fullWeeks(m && m.weeks);
   if (w.length < 8) return null;
   const B = w.slice(-4), A = w.slice(-8,-4);
   const sb = B.reduce((s,x)=>s+x.clicks,0), sa = A.reduce((s,x)=>s+x.clicks,0);
