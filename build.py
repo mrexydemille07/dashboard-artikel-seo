@@ -30,6 +30,13 @@ def main():
     sites = load("sites.json", [])
     sites_status = load("sites_status.json", [])
     laporan = load("laporan.json", {})
+    diagnose = load("diagnose.json", {})
+    # embed cuma 200 teratas (impr) — sisanya di-fetch live() dari data/diagnose.json.
+    # faq = string JSON-LD utuh (paling mahal), jadi jangan tanam semuanya.
+    def _dslim(u, v):
+        return {k: v[k] for k in ("judul","client","impr","has_faq","faq","h2_suggest","issues") if k in v}
+    top_diag = sorted(diagnose.items(), key=lambda kv: -(kv[1].get("impr") or 0))[:200]
+    diag_slim = {u: _dslim(u, v) for u, v in top_diag}
 
     # gsc_raw.json = semua URL semua situs (~33rb, 30 MB). Dashboard butuh dua bentuk:
     #   gsc.json        -> hanya URL artikel di kertas kerja (tab artikel)
@@ -293,6 +300,7 @@ def main():
                       ("/*__IDEAS__*/[]", js(ideas)),
                       ("/*__LANDING_GAP__*/[]", js(landing_gap)),
                       ("/*__LAPORAN__*/{}", js(laporan_map)),
+                       ("/*__DIAGNOSE__*/{}", js(diag_slim)),
                        ("/*__POSTS__*/{}", js({"weeks": weeks_all, "domains": slim})),
                        ("/*__META__*/{}", js(meta))):
         assert token in tpl, "token hilang dari template: " + token

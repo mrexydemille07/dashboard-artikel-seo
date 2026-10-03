@@ -212,7 +212,8 @@ const PORTFOLIO = /*__PORTFOLIO__*/[];       // 1 baris per domain: kertas kerja
 const IDEAS     = /*__IDEAS__*/[];           // ide konten: query GSC yang belum punya artikel
 const LANDING_GAP = /*__LANDING_GAP__*/[];   // halaman dilaporkan ke klien tapi tak muncul di GSC
 const LAPORAN   = /*__LAPORAN__*/{};
-const POSTS    = /*__POSTS__*/{};   // semua artikel sitemap per domain (diisi live() dari data/posts.json)         // domain -> {keyword: [posisi, vol, priority, landing, produk]}
+const POSTS    = /*__POSTS__*/{};
+const DIAGNOSE = /*__DIAGNOSE__*/{};   // FAQ JSON-LD + outline H2 per artikel (diagnose.py)   // semua artikel sitemap per domain (diisi live() dari data/posts.json)         // domain -> {keyword: [posisi, vol, priority, landing, produk]}
 
 const TODAY = new Date().toISOString().slice(0,10);
 const CUR_KEY = TODAY.slice(0,7);            // "2026-09"
@@ -1515,6 +1516,33 @@ function aksiMeta(){
       <div class="small">saran desc: <span class="muted">${esc(a.saran_desc||'—')}</span></div>
     </div>`).join('');
 }
+// Kartu FAQ schema + outline H2 (sumber: data/diagnose.json via diagnose.py)
+function aksiDiagnose(){
+  const dom = F.site;
+  const url2dom = {};
+  for (const a of ARTICLES) if (a.live_url) url2dom[a.live_url] = a.domain;
+  let rows = Object.entries(DIAGNOSE || {}).map(([u, v]) => ({u, v}));
+  if (dom) rows = rows.filter(r => url2dom[r.u] === dom);
+  rows.sort((a, b) => (b.v.impr || 0) - (a.v.impr || 0));
+  const top = rows.filter(r => !r.v.has_faq || (r.v.h2_suggest || []).length).slice(0, 12);
+  if (!Object.keys(DIAGNOSE || {}).length)
+    return '<div class="row muted">Belum ada diagnosis — jalankan <code>python diagnose.py</code> lalu build ulang.</div>';
+  if (!top.length) return '<div class="row muted">Semua artikel sudah punya FAQ schema + H2 cukup. 👍</div>';
+  return top.map(r => {
+    const v = r.v;
+    const iss = (v.issues || []).map(i=>`<span class="pill p-warn">${esc(i)}</span>`).join(' ');
+    const faqBtn = v.faq ? `<div class="small" style="margin-top:4px">
+        <button class="btn-copyraw" data-raw="${esc(v.faq)}">Salin FAQ JSON-LD</button>
+        <span class="muted">tempel sebelum &lt;/body&gt; — cek ulang jawabannya dulu</span></div>` : '';
+    const h2 = (v.h2_suggest || []).length ? `<div class="small" style="margin-top:4px"><b>outline H2 (halaman ini cuma punya ${v.h2? v.h2.length : 0} H2):</b><br>${
+        v.h2_suggest.map(h=>'• '+esc(h)).join('<br>')}
+        <button class="btn-copyraw" data-raw="${esc(v.h2_suggest.join('\n'))}">Salin outline</button></div>` : '';
+    return `<div class="row">
+      <b>${esc((v.judul || r.u).slice(0, 84))}</b>
+      <span class="muted small">— ${esc(v.client || '')} • impr ${fmt(v.impr || 0)}</span> ${iss}
+      ${faqBtn}${h2}</div>`;
+  }).join('');
+}
 function viewAksi(){
   const dom = F.site;   // filter brand lintas semua kartu
   const inDom = a => !dom || a.domain === dom;
@@ -1597,6 +1625,9 @@ function viewAksi(){
   <h2>✏️ Perbaikan Meta Siap-Tempel <span class="muted small">(saran title/desc dari audit — tetap baca ulang sebelum tempel)</span></h2>
   <div class="card">${aksiMeta()}</div>
 
+  <h2>🧾 FAQ Schema &amp; Outline H2 <span class="muted small">(draft dari diagnose.py — jawaban = kalimat dari halaman sendiri, cek dulu sebelum tempel)</span></h2>
+  <div class="card">${aksiDiagnose()}</div>
+
   <h2>Rencana Aksi — Perbaikan Massal</h2>
   <div class="two">
     <div class="card"><div class="lbl">Isi keyword untuk artikel yang belum punya</div>
@@ -1675,6 +1706,13 @@ function bind(){
     else {const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);
           ta.select();try{document.execCommand('copy')}catch(e){}ta.remove();done();}
   });
+  document.querySelectorAll('.btn-copyraw').forEach(b=>b.onclick=()=>{
+    const txt=b.dataset.raw;
+    const done=()=>{b.textContent='Tersalin';setTimeout(()=>b.textContent='Salin',1400);};
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done,done);
+    else {const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);
+          ta.select();try{document.execCommand('copy')}catch(e){}ta.remove();done();}
+  });
   const dl = document.getElementById('dl-pipeline');
   if (dl) dl.onclick = () => downloadCsv('pipeline-artikel.csv',
     ['Kategori','Klien','Bulan','Judul','Deadline','Status','Keyword','Draft','Live'],
@@ -1701,10 +1739,11 @@ async function live(){
   try{
     const b='?t='+Date.now();
     const get = (f, dflt) => fetch('data/'+f+b).then(r=>r.ok?r.json():dflt).catch(()=>dflt);
-    const [ar, br, gs, au, ps] = await Promise.all([
+    const [ar, br, gs, au, ps, dg] = await Promise.all([
       get('articles.json', []), get('brands.json', []),
       get('gsc.json', {}), get('unindexed_audit.json', []),
       get('posts.json', null),
+      get('diagnose.json', null),
     ]);
     if(Array.isArray(ar)&&ar.length){ ARTICLES.length=0; ARTICLES.push(...ar); }
     if(Array.isArray(br)&&br.length){ BRANDS.length=0; BRANDS.push(...br); }
@@ -1712,6 +1751,8 @@ async function live(){
     Object.keys(GSC).forEach(k=>delete GSC[k]); Object.assign(GSC, gs||{});
     if (ps && ps.domains) { Object.keys(POSTS).forEach(k=>delete POSTS[k]);
       POSTS.weeks = ps.weeks; POSTS.domains = ps.domains; }
+    if (dg && Object.keys(dg).length) { Object.keys(DIAGNOSE).forEach(k=>delete DIAGNOSE[k]);
+      Object.assign(DIAGNOSE, dg); }
     rebuildGscIndex();
     document.getElementById('stamp').textContent =
       'Data terbaru dimuat '+new Date().toLocaleTimeString('id-ID')+' • '+ARTICLES.length+' artikel';

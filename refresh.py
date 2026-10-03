@@ -35,6 +35,7 @@ def main():
     # 4) semua URL artikel per brand dari sitemap -> data/posts.json
     # (gsc_raw.json sudah ada dari langkah 2; dipakai utk fallback + join metrik)
     run([sys.executable, "sitemap_posts.py"])
+    run([sys.executable, "diagnose.py"])   # resume: hanya fetch URL baru
 
     # 5) build + test render
     run([sys.executable, "build.py"])
