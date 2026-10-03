@@ -2371,12 +2371,12 @@
   "len_desc": 127,
   "issues": [
    "title 96 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"vlan troubleshooting\" tidak ada di title",
-   "keyword \"vlan troubleshooting\" tidak ada di description"
+   "keyword \"ini kenapa ya\" tidak ada di title",
+   "keyword \"ini kenapa ya\" tidak ada di description"
   ],
-  "saran_title": "VLAN Trunking Troubleshooting: Cara Audit Jaringan Saat",
-  "saran_desc": "Simak vlan troubleshooting: Pelajari VLAN trunking troubleshooting untuk audit jaringan, mengatasi link bermasalah, dan mencegah gangguan VLAN pada switch.",
-  "keyword": "vlan troubleshooting"
+  "saran_title": "Ini kenapa ya — VLAN Trunking Troubleshooting: Cara Audit",
+  "saran_desc": "Simak ini kenapa ya: Pelajari VLAN trunking troubleshooting untuk audit jaringan, mengatasi link bermasalah, dan mencegah gangguan VLAN pada switch.",
+  "keyword": "ini kenapa ya"
  },
  "https://strategy.proxsisgroup.com/insight/penyebab-blackout-sumatera-mitigasi-bisnis": {
   "judul": "3 Dugaan Penyebab Blackout di Sumatera, Antisipasi untuk Bisnis Anda",
@@ -2576,13 +2576,11 @@
   "len_desc": 156,
   "issues": [
    "title 95 karakter (ideal ≤60) — terpotong di SERP",
-   "description 156 karakter (ideal ≤155)",
-   "keyword \"deepwater horizon adalah\" tidak ada di title",
-   "keyword \"deepwater horizon adalah\" tidak ada di description"
+   "description 156 karakter (ideal ≤155)"
   ],
   "saran_title": "Deepwater Horizon Bukan Sekedar Cerita: ICS Kunci",
-  "saran_desc": "Simak deepwater horizon adalah: Incident Command System migas membantu koordinasi darurat, mempercepat respons, dan memperkuat keselamatan migas Indonesia…",
-  "keyword": "deepwater horizon adalah"
+  "saran_desc": "Incident Command System migas membantu koordinasi darurat, mempercepat respons, dan memperkuat keselamatan migas Indonesia dari pelajaran Deepwater…",
+  "keyword": "deepwater horizon"
  },
  "https://it.proxsisgroup.com/awas-denda-uu-pdp-cek-kepatuhan-perusahaan/": {
   "judul": "Denda UU PDP Bisa Mencapai Miliaran Rupiah, Apakah Perusahaan Anda Sudah Siap Diaudit?",
@@ -4081,12 +4079,12 @@
   "issues": [
    "title 95 karakter (ideal ≤60) — terpotong di SERP",
    "description 185 karakter (ideal ≤155)",
-   "keyword \"enterprise architecture for banking\" tidak ada di title",
-   "keyword \"enterprise architecture for banking\" tidak ada di description"
+   "keyword \"enterprise banking adalah\" tidak ada di title",
+   "keyword \"enterprise banking adalah\" tidak ada di description"
   ],
   "saran_title": "Inilah Strategi Enterprise Architecture Consulting di Bank",
-  "saran_desc": "Simak enterprise architecture for banking: Pelajari bagaimana Enterprise Architecture Consulting membantu bank digital mengatasi tantangan regulasi dan…",
-  "keyword": "enterprise architecture for banking"
+  "saran_desc": "Simak enterprise banking adalah: Pelajari bagaimana Enterprise Architecture Consulting membantu bank digital mengatasi tantangan regulasi dan teknologi…",
+  "keyword": "enterprise banking adalah"
  },
  "https://biztechacademy.id/mengenal-xla-kunci-baru-kepuasan-layanan-it/": {
   "judul": "Transisi dari SLA ke XLA untuk Kepuasan User",
@@ -5309,12 +5307,12 @@
   "len_desc": 147,
   "issues": [
    "title 79 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"arc flash\" tidak ada di title",
-   "keyword \"arc flash\" tidak ada di description"
+   "keyword \"flash audit\" tidak ada di title",
+   "keyword \"flash audit\" tidak ada di description"
   ],
-  "saran_title": "Arc flash — Waspada Bus Flash! Pentingnya Audit K3 Listrik",
-  "saran_desc": "Simak arc flash: Lindungi aset industri dan nyawa pekerja dari ledakan Bus Flash. Simak pentingnya audit K3 Listrik berkala bersama Ahli BNSP untuk cegah…",
-  "keyword": "arc flash"
+  "saran_title": "Flash audit — Waspada Bus Flash! Pentingnya Audit K3",
+  "saran_desc": "Simak flash audit: Lindungi aset industri dan nyawa pekerja dari ledakan Bus Flash. Simak pentingnya audit K3 Listrik berkala bersama Ahli BNSP untuk…",
+  "keyword": "flash audit"
  },
  "https://synergysolusi.com/artikel-qhse/strategi-csms-level-a-kontraktor-migas/": {
   "judul": "Studi Kasus: Bagaimana Kontraktor Migas Kalimantan Meraih CSMS Level A dalam 6 Bulan — Strategi, Hambatan, dan Hasil yang Bisa Ditiru",
@@ -5614,12 +5612,12 @@
   "len_desc": 132,
   "issues": [
    "title 76 karakter (ideal ≤60) — terpotong di SERP",
-   "keyword \"human oversight adalah\" tidak ada di title",
-   "keyword \"human oversight adalah\" tidak ada di description"
+   "keyword \"tata kelola ai dalam manufaktur\" tidak ada di title",
+   "keyword \"tata kelola ai dalam manufaktur\" tidak ada di description"
   ],
-  "saran_title": "Human oversight adalah — AI Governance untuk Perusahaan:",
-  "saran_desc": "Simak human oversight adalah: AI governance membantu perusahaan mengontrol risiko AI, compliance, dan keamanan data agar penggunaan AI tidak menjadi…",
-  "keyword": "human oversight adalah"
+  "saran_title": "Tata kelola ai dalam manufaktur — AI Governance untuk",
+  "saran_desc": "Simak tata kelola ai dalam manufaktur: AI governance membantu perusahaan mengontrol risiko AI, compliance, dan keamanan data agar penggunaan AI tidak…",
+  "keyword": "tata kelola ai dalam manufaktur"
  },
  "https://ipqi.org/pelatihan-gudang-skill-sop-wms-manajemen-stok/": {
   "judul": "Pelatihan Gudang: Skill, SOP, WMS, dan Manajemen Stok",
@@ -8686,5 +8684,128 @@
   "saran_title": "Kerangka kepatuhan berkelanjutan — Ini Waktu yang Tepat",
   "saran_desc": "Simak kerangka kepatuhan berkelanjutan: Sertifikasi ISO 37301 membantu perusahaan membangun sistem manajemen kepatuhan, mengelola risiko regulasi, dan…",
   "keyword": "kerangka kepatuhan berkelanjutan"
+ },
+ "https://indonesiasafetycenter.org/korsleting-pabrik-cikupa-bom-waktu-bencana-nasional-2026/": {
+  "judul": "Korsleting Pabrik Cikupa: Bom Waktu Bencana Nasional 2026?",
+  "client": "ISC",
+  "impr": 676,
+  "clicks": 10,
+  "ctr": 1.48,
+  "pos": 7.5,
+  "title": "Korsleting Pabrik Cikupa: Bom Waktu Bencana Nasional 2026? - Indonesia Safety Center",
+  "desc": "",
+  "h1": "",
+  "len_title": 84,
+  "len_desc": 0,
+  "issues": [
+   "title 84 karakter (ideal ≤60) — terpotong di SERP",
+   "meta description kosong"
+  ],
+  "saran_title": "Korsleting Pabrik Cikupa: Bom Waktu Bencana Nasional 2026?",
+  "saran_desc": "",
+  "keyword": ""
+ },
+ "https://isoindonesiacenter.com/integrasi-iso-56001-iso-22301-inovasi-korporat/": {
+  "judul": "ISO Corporate Innov (ISO 56001, 22301, Management System)",
+  "client": "Isocenter",
+  "impr": 201,
+  "clicks": 3,
+  "ctr": 1.49,
+  "pos": 11.0,
+  "title": "Integrasi ISO 56001 dan ISO 22301 untuk Inovasi Korporat dan Anti Krisis - ISOCENTER INDONESIA",
+  "desc": "Ketahui cara integrasi ISO 56001 dan ISO 22301 membangun sistem inovasi korporat yang tangguh, kebal krisis, dan menjaga kontinuitas bisnis Anda.",
+  "h1": "Integrasi ISO 56001 dan ISO 22301 untuk Inovasi Korporat dan Anti Krisis",
+  "len_title": 94,
+  "len_desc": 145,
+  "issues": [
+   "title 94 karakter (ideal ≤60) — terpotong di SERP",
+   "keyword \"hackathon indonesia\" tidak ada di title",
+   "keyword \"hackathon indonesia\" tidak ada di description"
+  ],
+  "saran_title": "Hackathon indonesia — Integrasi ISO 56001 dan ISO 22301",
+  "saran_desc": "Simak hackathon indonesia: Ketahui cara integrasi ISO 56001 dan ISO 22301 membangun sistem inovasi korporat yang tangguh, kebal krisis, dan menjaga…",
+  "keyword": "hackathon indonesia"
+ },
+ "https://grc-indonesia.com/artikel/uji-coba-business-continuity-plan-panduan-lengkap-iso-22301/": {
+  "judul": "Uji Coba business continuity plan",
+  "client": "GRC",
+  "impr": 137,
+  "clicks": 1,
+  "ctr": 0.73,
+  "pos": 6.2,
+  "title": "Uji Coba Business Continuity Plan (BCP): Panduan Lengkap ISO 22301",
+  "desc": "Uji coba BCP mengubah rencana di atas kertas menjadi kemampuan pulih yang teruji. Simak metode, tahapan, frekuensi ideal, dan kesalahan umumnya versi ISO 22301.",
+  "h1": "Uji Coba Business Continuity Plan (BCP): Panduan Lengkap ISO 22301",
+  "len_title": 66,
+  "len_desc": 160,
+  "issues": [
+   "title 66 karakter (ideal ≤60) — terpotong di SERP",
+   "description 160 karakter (ideal ≤155)",
+   "keyword \"kepanjangan bcp\" tidak ada di title",
+   "keyword \"kepanjangan bcp\" tidak ada di description"
+  ],
+  "saran_title": "Kepanjangan bcp — Uji Coba Business Continuity Plan (BCP)",
+  "saran_desc": "Simak kepanjangan bcp: Uji coba BCP mengubah rencana di atas kertas menjadi kemampuan pulih yang teruji. Simak metode, tahapan, frekuensi ideal, dan…",
+  "keyword": "kepanjangan bcp"
+ },
+ "https://isoindonesiacenter.com/warehouse-management-cegah-kebocoran-stok/": {
+  "judul": "10 Praktik Terbaik Warehouse Management & Distribusi untuk Mencegah Kebocoran Stok",
+  "client": "Isocenter",
+  "impr": 117,
+  "clicks": 1,
+  "ctr": 0.85,
+  "pos": 8.1,
+  "title": "10 Praktik Warehouse Management untuk Cegah Kebocoran Stok",
+  "desc": "Selisih stok, barang rusak, dan lead time lambat bisa dicegah. Pelajari 10 praktik terbaik manajemen pergudangan dan distribusi yang terbukti efektif.",
+  "h1": "10 Cara Mengelola Gudang Efisien: Bebas Kebocoran Stok & Optimalkan Distribusi",
+  "len_title": 58,
+  "len_desc": 150,
+  "issues": [
+   "keyword \"2960 minggu yang lalu tanggal berapa\" tidak ada di title",
+   "keyword \"2960 minggu yang lalu tanggal berapa\" tidak ada di description"
+  ],
+  "saran_title": "10 Praktik Warehouse Management untuk Cegah Kebocoran Stok",
+  "saran_desc": "Simak 2960 minggu yang lalu tanggal berapa: Selisih stok, barang rusak, dan lead time lambat bisa dicegah. Pelajari 10 praktik terbaik manajemen…",
+  "keyword": "2960 minggu yang lalu tanggal berapa"
+ },
+ "https://hr.proxsisgroup.com/program-3t-mengubah-trainer-lewat-kekuatan-pikiran/": {
+  "judul": "Awerners Program 3T: Transforming The Trainer with Mind Power",
+  "client": "Proxsis HR",
+  "impr": 100,
+  "clicks": 1,
+  "ctr": 1.0,
+  "pos": 8.9,
+  "title": "Program 3T: Mengubah Trainer Lewat Kekuatan Pikiran - Proxsis HR",
+  "desc": "Pelajari Program 3T sebagai pendekatan pelatihan untuk mengubah trainer melalui kekuatan pikiran, mindset, dan metodologi efektif dalam pengembangan SDM.",
+  "h1": "Program 3T: Mengubah Trainer Lewat Kekuatan Pikiran",
+  "len_title": 64,
+  "len_desc": 153,
+  "issues": [
+   "title 64 karakter (ideal ≤60) — terpotong di SERP",
+   "keyword \"awerners\" tidak ada di title",
+   "keyword \"awerners\" tidak ada di description"
+  ],
+  "saran_title": "Awerners — Program 3T: Mengubah Trainer Lewat Kekuatan",
+  "saran_desc": "Simak awerners: Pelajari Program 3T sebagai pendekatan pelatihan untuk mengubah trainer melalui kekuatan pikiran, mindset, dan metodologi efektif dalam…",
+  "keyword": "awerners"
+ },
+ "https://strategy.proxsisgroup.com/insight/panduan-re-alignment-strategi-vendor-bumn": {
+  "judul": "Strategi Divestasi Aset Non-Inti untuk Likuiditas Korporasi",
+  "client": "Strategy.Proxsis",
+  "impr": 100,
+  "clicks": 0,
+  "ctr": 0,
+  "pos": 19.2,
+  "title": "Panduan Re-Alignment Strategi Vendor BUMN agar Tetap Kompetitif - Article - Proxsis Consulting",
+  "desc": "Pelajari panduan taktis re-alignment strategi vendor BUMN untuk menjaga margin, meningkatkan efisiensi bisnis, dan beradaptasi di tahun 2026.",
+  "h1": "",
+  "len_title": 94,
+  "len_desc": 141,
+  "issues": [
+   "title 94 karakter (ideal ≤60) — terpotong di SERP"
+  ],
+  "saran_title": "Panduan Re-Alignment Strategi Vendor BUMN agar Tetap",
+  "saran_desc": "Pelajari panduan taktis re-alignment strategi vendor BUMN untuk menjaga margin, meningkatkan efisiensi bisnis, dan beradaptasi di tahun 2026.",
+  "keyword": "vendor bumn"
  }
 }
