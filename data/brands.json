@@ -30,13 +30,13 @@
   "articles": 70
  },
  {
-  "domain": "indonesiasafetycenter.org",
-  "client": "ISC",
-  "articles": 60
- },
- {
   "domain": "environment-indonesia.com",
   "client": "IEC Non-BNSP",
+  "articles": 65
+ },
+ {
+  "domain": "indonesiasafetycenter.org",
+  "client": "ISC",
   "articles": 60
  },
  {
@@ -67,12 +67,12 @@
  {
   "domain": "grc-indonesia.com",
   "client": "GRC",
-  "articles": 39
+  "articles": 43
  },
  {
   "domain": "ipqi.org",
   "client": "IPQI",
-  "articles": 39
+  "articles": 43
  },
  {
   "domain": "digital.proxsisgroup.com",
